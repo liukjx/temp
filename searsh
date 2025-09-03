@@ -1,0 +1,9 @@
+# 为新功能创建 worktree
+git worktree add -b feature/user-auth ../auth-feature main
+# 在功能分支上工作
+cd ../auth-feature
+# 进行更改，频繁提交
+# 准备合并时
+git checkout main
+git merge feature/user-auth
+git worktree remove ../auth-feature
