@@ -1,5 +1,0 @@
-fire
-torchvision
-visdom
-tqdm
-ipdb
