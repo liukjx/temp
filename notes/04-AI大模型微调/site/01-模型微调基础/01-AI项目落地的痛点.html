@@ -1,0 +1,928 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      
+        <link rel="next" href="02-%E5%BE%AE%E8%B0%83%E7%9A%84%E9%98%B6%E6%AE%B5.html">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
+    
+    
+      
+        <title>1.1 AI项目落地的痛点 - 大模型微调</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#11-ai" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="大模型微调" class="md-header__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            大模型微调
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              1.1 AI项目落地的痛点
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="大模型微调" class="md-nav__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    大模型微调
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1:模型微调基础
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            1:模型微调基础
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    1.1 AI项目落地的痛点
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="01-AI%E9%A1%B9%E7%9B%AE%E8%90%BD%E5%9C%B0%E7%9A%84%E7%97%9B%E7%82%B9.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    1.1 AI项目落地的痛点
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.领域知识缺失
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.格式与任务不匹配
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.价值观和风格偏差
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.数据分布偏移
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.部署与推理成本高
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-%E5%BE%AE%E8%B0%83%E7%9A%84%E9%98%B6%E6%AE%B5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.2 微调的阶段
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.3 环境搭建
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.4 模型训练核心流程
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%89%8B%E6%9C%BA%E4%BB%B7%E6%A0%BC%E5%8C%BA%E9%97%B4%E9%A2%84%E6%B5%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.5 案例：手机价格区间预测
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2:AE模型(BERT系列)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            2:AE模型(BERT系列)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-HuggingFace.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.1 HuggingFace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.2 案例：中文文本分类微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3:AR模型(大模型)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            3:AR模型(大模型)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E7%AD%96%E7%95%A5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.1 大模型微调策略
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-PEFT%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.2 PEFT微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/03-%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8ELLaMaFactory%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%AE%9E%E6%88%98.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.3 案例：基于LLaMa-Factory大模型微调实战
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4:模型压缩
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            4:模型压缩
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/01-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.1 模型压缩
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E5%89%8D%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.2 案例：量化前Qwen和量化后Qwen int4的对比
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.领域知识缺失
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.格式与任务不匹配
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.价值观和风格偏差
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.数据分布偏移
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.部署与推理成本高
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="11-ai">1.1 AI项目落地的痛点<a class="headerlink" href="#11-ai" title="Permanent link">&para;</a></h1>
+<p>从短视频的火爆热议到新闻的权威报道，仿佛只要搭上AI这趟快车，就能“一飞冲天”，实现逆袭；可要是不碰AI，那很快就会被时代的洪流无情淘汰，这股风潮让很多人感到焦虑。然而，现实却很尴尬：大多数企业的AI项目“雷声大，雨点小”，前期宣传得轰轰烈烈，仿佛马上就要改变世界，真正落地实施时却无声无息，成效寥寥。那问题究竟出在哪？</p>
+<p>下面我们来剖析一下AI项目落地过程中的痛点。这些痛点是许多AI项目最终失败或无法产生价值的真正原因。</p>
+<h2 id="1">1.领域知识缺失<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>模型不懂行业术语、公司内部黑话和产品信息，导致模型回答不专业、不准确，甚至产生错误。</p>
+<p><strong>案例1：金融客服机器人</strong></p>
+<p><strong>业务需求</strong>：在金融领域，用户 <strong>OTC指“场外交易”</strong></p>
+<p><strong>场景</strong>：用户问：'我的OTC怎么还没审核通过'</p>
+<p><strong>模型回答：</strong></p>
+<p><img src="assets/image-20251014153433427.png" alt="image-20251014153433427" style="zoom:50%;" /></p>
+<p>上述回答提供错误或无关的信息，显得非常不专业，直接损害客户信任。原因就是模型学习了大量的公共知识，但没学过你公司的内部培训手册、产品文档和行业规范。他不懂你的行业术语、公司内部的黑话和缩写。</p>
+<h2 id="2">2.格式与任务不匹配<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>业务需要结构化输出（如意图标签、JSON格式），但模型倾向于生成自由文本，导致输出结果难以被后端系统解析和集成，自动化流程中断。</p>
+<p><strong>案例2：商品信息抽取</strong></p>
+<p><strong>业务需求</strong>：商品信息需要固定json格式以录入数据库</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Apple&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iPhone 15 Pro Max&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;国行&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;storage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1TB&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;color&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;蓝色&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>场景：</strong> 用户问：从商品标题“Apple/苹果 iPhone 15 Pro Max 国行原装 1TB 蓝色”中提取信息。</p>
+<p><strong>模型回答：</strong></p>
+<p><img src="assets/image-20251014154438500.png" alt="image-20251014154438500" style="zoom:50%;" /></p>
+<p>上述回答是连贯的文本，但你的业务需要它“按照预定格式输出精准的结构化数据”。模型的输出格式不可控。输出结果无法被自动化流程解析和集成，需要大量人工介入，失去了AI的效率优势。那么无法实现真正的自动化与系统对接。</p>
+<h2 id="3">3.价值观和风格偏差<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p>模型风格随机，可能不符合企业所需的严谨、中立、专业的客服语调，甚至存在安全风险，用户体验差，影响品牌形象，存在合规风险。 </p>
+<p><strong>案例3：高端品牌客服</strong></p>
+<p><strong>业务需求：</strong> 客服回复需要体现专业、矜持、高端的品牌形象,如下所示：</p>
+<div class="highlight"><pre><span></span><code><span class="na">尊敬的客户，感谢您的反馈。我们所选用的头层小牛皮在赋予包袋独特质感与光泽的同时，也确实需要更为精心的呵护。建议您避免与尖锐物品摩擦，并使用我们随箱附赠的护理布进行日常保养。这有助于保持其最佳状态。</span>
+</code></pre></div>
+<p><strong>场景：</strong> 用户问：你们这款奢侈品包怎么这么容易有划痕？</p>
+<p><strong>模型回答：</strong></p>
+<p><img src="assets/image-20251014155941535.png" alt="image-20251014155941535" style="zoom:50%;" /></p>
+<p>我们希望他作为客服，应该体现专业、矜持、高端的品牌形象。上述回答风格过于随意，没有经过企业品牌调性和合规要求的校准。损害品牌形象，让客户觉得不专业。用户体验不一致，每次对话感觉像在跟不同的人交流。</p>
+<h2 id="4">4.数据分布偏移<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<p>模型无法获取和理解公司内部的非公开文档、知识库和最新政策。 无法构建基于私有知识的智能问答等应用。</p>
+<p><strong>案例4：企业内部知识库问答</strong></p>
+<p><strong>业务需求</strong>：模型需要能阅读公司内部的《员工福利政策V2.3.pdf》并给出准确答案。</p>
+<p><strong>场景</strong>：用户问：“我们公司今年的团建预算标准是多少？什么时候申请？”</p>
+<p><strong>期望回答</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="na">根据2024年发布的《员工福利政策V2.3》，今年的部门团建预算标准为人均500元。申请通道在每年6月和12月开放，需通过OA系统提交‘团队活动申请’表单。”</span>
+</code></pre></div>
+<p><strong>模型回答</strong>：</p>
+<p><img src="assets/image-20251014172900581.png" alt="image-20251014172900581" style="zoom:50%;" /></p>
+<p>上述回答并没有真正解决用户的需求，不解决私有数据问题，模型在内部业务场景中无法发挥核心价值的。</p>
+<h2 id="5">5.部署与推理成本高<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<p><strong>1. 巨大的部署与推理成本</strong></p>
+<ul>
+<li><strong>表现</strong>：训好的大模型对计算资源（GPU显存）要求极高，普通服务器根本无法承载，导致部署成本成为财务负担。</li>
+<li><strong>案例</strong>：一个7B参数的模型，仅加载就需要约14GB显存，这还不包括处理长对话所需的开销。企业需要购买昂贵的专业显卡，运营电费和运维成本高昂。</li>
+</ul>
+<p><strong>2. 推理速度慢</strong></p>
+<ul>
+<li><strong>表现</strong>：用户问一个问题，模型需要好几秒甚至更长时间才能回答，用户体验极差。</li>
+<li><strong>案例</strong>：一个内部知识库问答系统，员工每次查询都要等待10秒以上，最终大家宁愿手动翻文档也不再使用它。</li>
+</ul>
+<h2 id="6">6.总结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>AI项目落地过程中存在的问题：</p>
+<ol>
+<li><strong>领域知识缺失</strong> :模型缺乏行业术语、企业内部知识，导致回答不专业、不准确。</li>
+<li><strong>格式与任务不匹配</strong> : 模型输出为自由文本，而非业务所需的结构化数据（如JSON），难以集成到自动化系统。</li>
+<li><strong>价值观和风格偏差</strong> :模型风格随机，不符合企业品牌调性，存在语气不当、合规风险。</li>
+<li><strong>数据分布偏移</strong> ：模型无法访问企业内部非公开文档和最新政策，导致在私有知识场景中失效。</li>
+<li><strong>部署与推理成本高</strong> ：大模型对计算资源要求高，部署和推理成本昂贵，速度慢。</li>
+</ol>
+<p>认识到上述痛点，是我们成功应用AI的第一步。整个课程后续要讲解的相关技术，都是为了解决这些问题：</p>
+<ul>
+<li><strong>模型微调</strong>：就是为了解决领域知识缺失、格式与任务不匹配、价值观和风格偏差的痛点 ，把通用模型培训成我们的业务专家。</li>
+<li><strong>模型压缩（量化）</strong>：就是为了解决部署成本高、推理速度慢 ，给模型瘦身，让它能跑在更便宜的设备上，并且提高推理速度。</li>
+<li><strong>RAG等技术</strong>：就是为了解决数据分布偏移、私域数据不可及的问题 ，给模型一本随时可查私域数据手册，让模型根据手册回答问题。</li>
+</ul>
+<p>本阶段课程中将围绕前两项技术进行详细的讲解。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+        <script src="../js/extra.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+  </body>
+</html>

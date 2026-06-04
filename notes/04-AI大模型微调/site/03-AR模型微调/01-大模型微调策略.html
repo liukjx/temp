@@ -1,0 +1,961 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E5%BE%AE%E8%B0%83.html">
+      
+      
+        <link rel="next" href="02-PEFT%E5%BE%AE%E8%B0%83.html">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
+    
+    
+      
+        <title>3.1 大模型微调策略 - 大模型微调</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#31" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="大模型微调" class="md-header__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            大模型微调
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              3.1 大模型微调策略
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="大模型微调" class="md-nav__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    大模型微调
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1:模型微调基础
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            1:模型微调基础
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/01-AI%E9%A1%B9%E7%9B%AE%E8%90%BD%E5%9C%B0%E7%9A%84%E7%97%9B%E7%82%B9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.1 AI项目落地的痛点
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/02-%E5%BE%AE%E8%B0%83%E7%9A%84%E9%98%B6%E6%AE%B5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.2 微调的阶段
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/03-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.3 环境搭建
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/04-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.4 模型训练核心流程
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/05-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%89%8B%E6%9C%BA%E4%BB%B7%E6%A0%BC%E5%8C%BA%E9%97%B4%E9%A2%84%E6%B5%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.5 案例：手机价格区间预测
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2:AE模型(BERT系列)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            2:AE模型(BERT系列)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-HuggingFace.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.1 HuggingFace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.2 案例：中文文本分类微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3:AR模型(大模型)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            3:AR模型(大模型)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    3.1 大模型微调策略
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="01-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E7%AD%96%E7%95%A5.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    3.1 大模型微调策略
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.情境学习
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.思维链
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-PEFT%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.2 PEFT微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8ELLaMaFactory%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%AE%9E%E6%88%98.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.3 案例：基于LLaMa-Factory大模型微调实战
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4:模型压缩
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            4:模型压缩
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/01-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.1 模型压缩
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E5%89%8D%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.2 案例：量化前Qwen和量化后Qwen int4的对比
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.情境学习
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.思维链
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="31">3.1 大模型微调策略<a class="headerlink" href="#31" title="Permanent link">&para;</a></h1>
+<h2 id="1">1.情境学习<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p><strong>情境学习（In-Context Learning）</strong> 是指大模型在不更新参数的情况下，仅通过提供示例来学习并完成任务的能力。</p>
+<p>在这种情境学习下，大模型无需更新任何参数，仅依赖几个示例样本（demonstrations）就可以学习新任务，执行新样本的预测。</p>
+<p><img alt="image-20251103171224152" src="assets/image-20251103171224152.png" /></p>
+<p>在这种情境学习的范式下，大模型无需更新任何参数，仅依赖几个示例样本（demonstrations）就可以学习新任务，执行新样本的预测。</p>
+<p><strong>案例1：结构化会议记录生成</strong></p>
+<p><strong>用户提问：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="na">请根据以下内容生成格式化会议记录：</span>
+<span class="na">本次周会决定，由张三在11月15日前完成市场分析报告初稿，并由李四在月底前完成官网UI</span><span class="w"> </span><span class="s">redesign。</span>
+</code></pre></div>
+<p>大模型回答结果：</p>
+<div class="highlight"><pre><span></span><code><span class="na">周会会议记录</span>
+<span class="na">会议类型：周会</span>
+<span class="na">会议核心决议及任务分配</span>
+<span class="na">任务</span><span class="w"> </span><span class="s">1：市场分析报告初稿撰写</span>
+<span class="na">负责人：张三</span>
+<span class="na">交付要求：完成报告初稿</span>
+<span class="na">截止时间：11</span><span class="w"> </span><span class="s">月 15 日前</span>
+<span class="na">任务</span><span class="w"> </span><span class="s">2：官网 UI redesign</span>
+<span class="na">负责人：李四</span>
+<span class="na">交付要求：完成官网</span><span class="w"> </span><span class="s">UI 重新设计</span>
+<span class="na">截止时间：本月底前</span>
+</code></pre></div>
+<p><strong>利用情境学习的方式提问：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 任务定义</span>
+<span class="na">你是一个信息提取专家，负责从会议纪要中精准提取行动项，并转换为标准JSON格式。</span>
+
+<span class="c1"># 输出规范</span>
+<span class="c1">## JSON Schema</span>
+<span class="na">{</span>
+<span class="w">  </span><span class="na">&quot;action_items&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">[</span>
+<span class="w">    </span><span class="na">{</span>
+<span class="w">      </span><span class="na">&quot;item&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;决议事项的完整描述（保持原文关键信息）&quot;,</span>
+<span class="w">      </span><span class="na">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;仅包含负责人姓名，如&#39;张三&#39;&quot;,</span>
+<span class="w">      </span><span class="na">&quot;deadline&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;严格遵循YYYY-MM-DD格式的日期&quot;</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">}</span>
+<span class="na">示例：</span>
+
+<span class="c1"># 示例</span>
+<span class="c1">## 输入文本</span>
+<span class="na">“本次周会决定，由张三在11月15日前完成市场分析报告初稿，并由李四在月底前完成官网UI</span><span class="w"> </span><span class="s">redesign。”</span>
+
+<span class="c1">## 期望输出</span>
+<span class="na">```json</span>
+<span class="na">{</span>
+<span class="w">  </span><span class="na">&quot;action_items&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">[</span>
+<span class="w">    </span><span class="na">{</span>
+<span class="w">      </span><span class="na">&quot;item&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;完成市场分析报告初稿&quot;,</span>
+<span class="w">      </span><span class="na">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;张三&quot;, </span>
+<span class="w">      </span><span class="na">&quot;deadline&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;2024-11-15&quot;</span>
+<span class="w">    </span><span class="na">},</span>
+<span class="w">    </span><span class="na">{</span>
+<span class="w">      </span><span class="na">&quot;item&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;完成官网UI redesign&quot;,</span>
+<span class="w">      </span><span class="na">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;李四&quot;,</span>
+<span class="w">      </span><span class="na">&quot;deadline&quot;</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;2024-11-30&quot;</span>
+<span class="w">    </span><span class="na">}</span>
+<span class="w">  </span><span class="na">]</span>
+<span class="na">}</span>
+
+<span class="na">请根据以下内容生成结构化信息：</span>
+<span class="na">开发团队确认，小王需要在2025年12月31日前完成v2.0版本的核心功能开发，小张负责在年底前完成所有测试用例的编写。</span>
+</code></pre></div>
+<p>输出结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w">  </span><span class="nt">&quot;action_items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">    </span><span class="p">{</span><span class="w">      </span><span class="nt">&quot;item&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;完成v2.0版本的核心功能开发&quot;</span><span class="p">,</span><span class="w">      </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;小王&quot;</span><span class="p">,</span><span class="w">      </span><span class="nt">&quot;deadline&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-12-31&quot;</span><span class="w">    </span><span class="p">},</span><span class="w">    </span><span class="p">{</span><span class="w">      </span><span class="nt">&quot;item&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;完成所有测试用例的编写&quot;</span><span class="p">,</span><span class="w">      </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;小张&quot;</span><span class="p">,</span><span class="w">      </span><span class="nt">&quot;deadline&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2025-12-31&quot;</span><span class="w">    </span><span class="p">}</span><span class="w">  </span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h2 id="2">2.思维链<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p><strong>思维链</strong> 是一种通过让大语言模型（LLM）生成一系列中间推理步骤，来模拟人类解决复杂问题时的逐步思考过程，最终得出答案的技术。</p>
+<p>简单来说，它不是在问题出现后直接给出最终答案，而是像一个人在做数学题时在草稿纸上写下的计算过程一样，把“脑子里想的步骤”用语言表达出来。如下图所示：</p>
+<p><img src="assets/image-20251103085708827.png" alt="image-20251103085708827" style="zoom:50%;" /></p>
+<p>通过对比，清晰地展示了 思维链 方法的巨大优势。</p>
+<p><img src="assets/image-20251103082437437.png" alt="image-20251103082437437" style="zoom: 80%;" /></p>
+<p><strong>标准提问</strong>：只给问题和答案。模型会模仿直接给出最终答案，但容易出错（如答案算成27）。</p>
+<p><strong>思维链提问</strong>：在例子中展示一步步的推理过程。模型会模仿这种“慢思考”，把解题的中间步骤写出来（先算剩下几个，再算买来后总共几个），从而得出正确答案（9）。</p>
+<p><strong>案例3：差旅费报销审核</strong></p>
+<p>假设我们员工差旅的需求报销，如果不使用思维链，模型可能会直接给出一个错误的答案。但通过引导模型生成思维链，它可以正确解决问题。</p>
+<p><strong>直接提问：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="na">员工提交了一份差旅费报销单，包含以下项目：</span>
+<span class="na">高铁票：</span><span class="w"> </span><span class="s">550元</span>
+<span class="na">市内交通费：</span><span class="w"> </span><span class="s">120元</span>
+<span class="na">住宿费：</span><span class="w"> </span><span class="s">400元/晚 x 3晚 = 1200元</span>
+<span class="na">餐饮补贴：</span><span class="w"> </span><span class="s">150元/天 x 3天 = 450元</span>
+
+<span class="na">公司规定如下：</span>
+<span class="na">交通费实报实销，高铁票限二等座。</span>
+<span class="na">住宿费标准：一线城市（如北京、上海）上限为500元/晚，其他城市上限为400元/晚。本次出差城市为上海。</span>
+<span class="na">市内交通费每日限额50元。</span>
+<span class="na">餐饮补贴按出差天数发放，标准为100元/天。</span>
+<span class="na">请问，本次可报销的总金额是多少？</span>
+</code></pre></div>
+<p><strong>大模型回答的结果</strong>：</p>
+<div class="highlight"><pre><span></span><code><span class="na">本次可报销的总金额为</span><span class="w"> </span><span class="s">2320 元。</span>
+<span class="na">总金额计算</span>
+<span class="na">550</span><span class="w"> </span><span class="s">元（高铁票）+ 120 元（市内交通费）+ 1200 元（住宿费）+ 450 元（餐饮补贴）= 2320 元。</span>
+</code></pre></div>
+<p>上述回答明显是错误的。</p>
+<p><strong>使用思维链的方式提问：</strong></p>
+<div class="highlight"><pre><span></span><code><span class="na">请根据公司规定，逐步审核以下差旅费报销单。请遵循“思维链”的推理方式，一步一步地分析，并在最后给出结论。</span>
+<span class="na">报销单项目：</span>
+<span class="na">高铁票：</span><span class="w"> </span><span class="s">550元</span>
+<span class="na">市内交通费：</span><span class="w"> </span><span class="s">120元</span>
+<span class="na">住宿费：</span><span class="w"> </span><span class="s">400元/晚 × 3晚 = 1200元</span>
+<span class="na">餐饮补贴：</span><span class="w"> </span><span class="s">150元/天 × 3天 = 450元</span>
+
+<span class="na">公司规定：</span>
+<span class="na">交通费实报实销，高铁票限二等座。</span>
+<span class="na">住宿费标准：一线城市（如北京、上海）上限为500元/晚，其他城市上限为400元/晚。本次出差城市为上海。</span>
+<span class="na">市内交通费每日限额50元。</span>
+<span class="na">餐饮补贴按出差天数发放，标准为100元/天。</span>
+<span class="na">请按以下步骤推理：</span>
+<span class="na">第一步：分析和审核高铁票费用。</span>
+<span class="na">思考：公司对高铁票的规定是什么？申请的金额是否符合规定？</span>
+<span class="na">判断：</span>
+<span class="na">可报销金额：</span>
+<span class="na">第二步：分析和审核住宿费。</span>
+<span class="na">思考：上海属于哪类城市？住宿费标准上限是多少？申请金额是否超标？</span>
+<span class="na">判断：</span>
+<span class="na">可报销金额：</span>
+<span class="na">第三步：分析和审核市内交通费。</span>
+<span class="na">思考：出差总天数是多少？市内交通费的总限额是多少？申请金额是否在限额内？</span>
+<span class="na">判断：</span>
+<span class="na">可报销金额：</span>
+<span class="na">第四步：分析和审核餐饮补贴。</span>
+<span class="na">思考：公司标准是多少？按天数计算的总补贴限额是多少？申请金额是否超标？</span>
+<span class="na">判断：</span>
+<span class="na">可报销金额：</span>
+<span class="na">第五步：汇总计算最终可报销总额。</span>
+<span class="na">将前面各步核准的可报销金额相加。</span>
+<span class="na">最终可报销总额：</span>
+</code></pre></div>
+<p>大模型回答结果：</p>
+<div class="highlight"><pre><span></span><code><span class="na">第一步：分析和审核高铁票费用</span>
+<span class="na">思考：公司规定交通费实报实销，高铁票限二等座。未提及该高铁票座位等级超标，申请金额</span><span class="w"> </span><span class="s">550 元符合实报实销要求。判断：符合公司规定。可报销金额：550 元。</span>
+<span class="na">第二步：分析和审核住宿费</span>
+<span class="na">思考：上海属于一线城市，公司规定一线城市住宿费上限为</span><span class="w"> </span><span class="s">500 元 / 晚。员工申请 400 元 / 晚，未超过上限。判断：符合公司规定。可报销金额：1200 元。</span>
+<span class="na">第三步：分析和审核市内交通费</span>
+<span class="na">思考：出差总天数为</span><span class="w"> </span><span class="s">3 天，公司规定市内交通费每日限额 50 元，总限额为 150 元。员工申请 120 元，在总限额内。判断：符合公司规定。可报销金额：120 元。</span>
+<span class="na">第四步：分析和审核餐饮补贴</span>
+<span class="na">思考：公司规定餐饮补贴标准为</span><span class="w"> </span><span class="s">100 元 / 天，3 天总限额为 300 元。员工申请 150 元 / 天，总金额 450 元，超出限额。判断：部分超标。可报销金额：300 元。</span>
+<span class="na">第五步：汇总计算最终可报销总额</span>
+<span class="na">550</span><span class="w"> </span><span class="s">元（高铁票）+ 1200 元（住宿费）+ 120 元（市内交通费）+ 300 元（餐饮补贴）= 2170 元。最终可报销总额：2170 元。</span>
+</code></pre></div>
+<p>思维链的优势：</p>
+<ol>
+<li><strong>问题分解</strong>：将复杂的多步骤问题分解成更小、更易管理的子问题，从而将更多的“计算资源”分配给需要深度推理的步骤。</li>
+<li><strong>可解释性</strong>：它提供了一个窗口，让人们可以看到模型是如何得出答案的。如果答案错误，我们可以很方便地检查是哪个推理步骤出了问题，便于调试。</li>
+<li><strong>通用性</strong>：这种方法可广泛应用于数学应用题、常识推理和符号操作等多种需要推理的任务。</li>
+<li><strong>易于实现</strong>：对于足够大的现成语言模型，只需在**小样本提示**的示例中，加入几个包含思维链过程的例子，模型就能学会并模仿这种推理方式。</li>
+</ol>
+<h2 id="3">3.总结<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p><strong>1. 情境学习</strong> ： 不修改模型内部参数，而是通过提供示例，让模型在上下文中快速学习并执行新任务。</p>
+<p>优势是无需训练，快速适应，简单高效。</p>
+<p><strong>2.思维链</strong> ：引导模型在回答复杂问题时，模拟人类的思考方式，生成一系列**中间推理步骤**，最后才得出答案。</p>
+<p>优势是：</p>
+<ul>
+<li><strong>提升准确性</strong>：将复杂问题分解为简单步骤，避免一步到位的错误。</li>
+<li><strong>增强可解释性</strong>：模型的“思考过程”一目了然，便于理解和调试。</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+        <script src="../js/extra.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+  </body>
+</html>

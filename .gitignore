@@ -1,0 +1,54 @@
+# 二进制安装包
+*.exe
+*.dmg
+*.msi
+
+# 压缩包
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tar
+
+# 模型权重
+bert-base-chinese/
+weights/
+*.bin
+*.safetensors
+*.ckpt
+*.pth
+
+# 虚拟机镜像
+*.ova
+*.vmdk
+*.iso
+*.qcow2
+虚拟机/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE 配置
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# 媒体文件（课件图片保留）
+*.mp3
+*.mp4
+*.avi
+
+# 临时文件
+*.tmp
+*.log
+*.lenovoboxtmp

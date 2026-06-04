@@ -1,0 +1,1105 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/03-%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8ELLaMaFactory%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%AE%9E%E6%88%98.html">
+      
+      
+        <link rel="next" href="02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E5%89%8D%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94.html">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
+    
+    
+      
+        <title>4.1 模型压缩 - 大模型微调</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#41" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="大模型微调" class="md-header__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            大模型微调
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              4.1 模型压缩
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="大模型微调" class="md-nav__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    大模型微调
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1:模型微调基础
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            1:模型微调基础
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/01-AI%E9%A1%B9%E7%9B%AE%E8%90%BD%E5%9C%B0%E7%9A%84%E7%97%9B%E7%82%B9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.1 AI项目落地的痛点
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/02-%E5%BE%AE%E8%B0%83%E7%9A%84%E9%98%B6%E6%AE%B5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.2 微调的阶段
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/03-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.3 环境搭建
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/04-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.4 模型训练核心流程
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01-%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%9F%BA%E7%A1%80/05-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%89%8B%E6%9C%BA%E4%BB%B7%E6%A0%BC%E5%8C%BA%E9%97%B4%E9%A2%84%E6%B5%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.5 案例：手机价格区间预测
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2:AE模型(BERT系列)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            2:AE模型(BERT系列)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-HuggingFace.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.1 HuggingFace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.2 案例：中文文本分类微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3:AR模型(大模型)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            3:AR模型(大模型)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E7%AD%96%E7%95%A5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.1 大模型微调策略
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-PEFT%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.2 PEFT微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/03-%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8ELLaMaFactory%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%AE%9E%E6%88%98.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.3 案例：基于LLaMa-Factory大模型微调实战
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4:模型压缩
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            4:模型压缩
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    4.1 模型压缩
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="01-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    4.1 模型压缩
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.模型压缩意义
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.模型压缩方法
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.模型压缩方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1 模型量化
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2 模型剪枝
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3 知识蒸馏
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E5%89%8D%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.2 案例：量化前Qwen和量化后Qwen int4的对比
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.模型压缩意义
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.模型压缩方法
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.模型压缩方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1 模型量化
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2 模型剪枝
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3 知识蒸馏
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="41">4.1 模型压缩<a class="headerlink" href="#41" title="Permanent link">&para;</a></h1>
+<p>模型压缩的目标在尽可能保持模型性能的前提下，显著减少模型的大小、降低计算需求、提升推理速度。</p>
+<h2 id="1">1.模型压缩意义<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>尽管千亿、万亿参数级别的大模型展现出惊人的能力，但其部署和应用面临巨大瓶颈：</p>
+<p><strong>1. 硬件限制</strong></p>
+<p>动辄需要数百GB显存，远超绝大多数消费级和企业级显卡的容量。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">模型参数量</th>
+<th style="text-align: left;">估算显存需求 (使用AdamW)</th>
+<th style="text-align: left;">现实所需硬件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1B</strong></td>
+<td style="text-align: left;"><strong>~20 GB</strong></td>
+<td style="text-align: left;">RTX 3090 / 4090 (24GB)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>7B</strong></td>
+<td style="text-align: left;"><strong>~112-140 GB</strong></td>
+<td style="text-align: left;">多张A100 (如 2×A100 80GB)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>13B</strong></td>
+<td style="text-align: left;"><strong>~208-260 GB</strong></td>
+<td style="text-align: left;">多张A100/H100 (如 4×A100 80GB)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>70B</strong></td>
+<td style="text-align: left;"><strong>~1120-1400 GB</strong></td>
+<td style="text-align: left;">需要一整个A100/H100节点 (如 8×或更多)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>2. 推理延迟</strong></p>
+<p>参数量的巨大导致每次推理都需要巨大的计算量，使得响应速度慢，难以满足实时应用（如对话、翻译）的需求。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">模型大小</th>
+<th style="text-align: left;">精度</th>
+<th style="text-align: left;">硬件</th>
+<th style="text-align: left;">Time To First Token</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>7B</strong></td>
+<td style="text-align: left;">FP16</td>
+<td style="text-align: left;">A100 (80GB)</td>
+<td style="text-align: left;">50 - 200 ms</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>7B</strong></td>
+<td style="text-align: left;">INT4</td>
+<td style="text-align: left;">RTX 4090</td>
+<td style="text-align: left;">100 - 300 ms</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>13B</strong></td>
+<td style="text-align: left;">FP16</td>
+<td style="text-align: left;">A100 (80GB)</td>
+<td style="text-align: left;">100 - 400 ms</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>70B</strong></td>
+<td style="text-align: left;">FP16</td>
+<td style="text-align: left;">单卡 A100</td>
+<td style="text-align: left;">500 - 2000 ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>3.能耗与成本</strong></p>
+<p>运行大模型需要昂贵的GPU服务器和大量的电力，成本极高，难以规模化应用。</p>
+<p><img src="assets/image-20251103210225045.png" alt="image-20251103210225045" style="zoom:50%;" /></p>
+<p><strong>4.无法端侧部署</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">模型参数量</th>
+<th style="text-align: left;">FP16/BF16 需求 (估算)</th>
+<th style="text-align: left;">典型代表模型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>7B</strong></td>
+<td style="text-align: left;"><strong>14-16 GB</strong></td>
+<td style="text-align: left;">LLaMA-7B, ChatGLM-6B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>13B</strong></td>
+<td style="text-align: left;"><strong>26-28 GB</strong></td>
+<td style="text-align: left;">LLaMA2-13B, Qwen-14B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>34B</strong></td>
+<td style="text-align: left;"><strong>68-72 GB</strong></td>
+<td style="text-align: left;">Qwen-32B, Yi-34B</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>70B</strong></td>
+<td style="text-align: left;"><strong>140-146 GB</strong></td>
+<td style="text-align: left;">LLaMA2-70B, ChatGLM3-130B(*)</td>
+</tr>
+</tbody>
+</table>
+<p>手机、物联网设备等边缘设备的计算资源和内存极其有限，无法直接运行大模型。</p>
+<p><img src="assets/image-20251103205844843.png" alt="image-20251103205844843" style="zoom:50%;" /></p>
+<h2 id="2">2.模型压缩方法<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>对于一些较大的模型，往往需要通过一些模型压缩的技术，使其能满足不同计算硬件的要求。常见的模型压缩方法有：量化，剪枝和蒸馏。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">技术</th>
+<th style="text-align: left;">核心思想</th>
+<th style="text-align: left;">主要优点</th>
+<th style="text-align: left;">缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>量化</strong></td>
+<td style="text-align: left;">降低数值精度（如FP32 -&gt; INT8）</td>
+<td style="text-align: left;">效果显著，应用广泛，硬件支持好</td>
+<td style="text-align: left;">极低精度下可能损失性能</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>剪枝</strong></td>
+<td style="text-align: left;">移除不重要的参数或结构</td>
+<td style="text-align: left;">直接减少参数量和计算量</td>
+<td style="text-align: left;">可能破坏模型结构，需要微调</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>知识蒸馏</strong></td>
+<td style="text-align: left;">大模型教小模型</td>
+<td style="text-align: left;">能训练出原生的小而强模型</td>
+<td style="text-align: left;">训练过程复杂，需要教师模型</td>
+</tr>
+</tbody>
+</table>
+<p>在实际应用中，这些技术常常被组合使用，从而最大程度地在保持性能的同时，缩小模型体积、提升推理速度。</p>
+<h3 id="21">2.1 模型量化<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>模型量化是一种用于减少神经网络模型大小和计算量的技术，将模型参数（如：权重）从高精度数据类型（如：float32）转换为低精度数据类型（如：int8 或 int4）。模型量化通过以更少的位数表示数据，可以减少模型尺寸，进而减少在推理时的内存消耗，并且在一些低精度运算较快的处理器上可以增加推理速度，同时仍然可以保持模型的性能。</p>
+<p>量化的本质是一个映射过程：将浮点数的范围 <code>[α, β]</code> 映射到整数的范围 <code>[q_min, q_max]</code>  。常用的量化方法包括 对称量化 （symmetric quantization）和 非对称量化 （asymmetric quantization），它们都是线性映射（linear mapping）的不同形式。</p>
+<p>对称量化的核心思想是将浮点数量化为整数，且量化后的分布是关于零对称的。</p>
+<p><img alt="image-20250509220920733" src="assets/image-20250509220920733.png" /></p>
+<p>下面是以量化为 Int8 类型举例的核心算法公式，量化为其他类型的整数公式类似：</p>
+<p>计算 Scale :
+$$
+\text{Scale} = \frac{|R_{\text{max}}|}{Q_{\text{max}}}
+$$</p>
+<p>量化和反量化公式：
+$$
+Q = \text{Round}\left(\frac{R}{\text{Scale}}\right)
+$$</p>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+Q = \text{Clip}(Q, -127, 127)
+</div>
+<script type="math/tex; mode=display">
+Q = \text{Clip}(Q, -127, 127)
+</script>
+</div>
+<div class="arithmatex">
+<div class="MathJax_Preview">
+R' = Q \times \text{Scale}
+</div>
+<script type="math/tex; mode=display">
+R' = Q \times \text{Scale}
+</script>
+</div>
+<ul>
+<li>|Rmax|是原始浮点数范围内的最大绝对值。</li>
+<li>Qmax 是量化后整数的最大绝对值。</li>
+<li>R是要量化的浮点数。</li>
+<li>Q 是量化后的整数值，记得要向下取整，并且在 -127-127 （实际工程上一般舍弃 -128）范围内进行 clip ，控制不要使得量化后的值超出这个范围。</li>
+<li>R′ 是反量化后恢复的近似浮点值。</li>
+</ul>
+<p>假如有一个浮点类型的输入 Xf矩阵，还有一个浮点类型的权重 Wf 矩阵，我们可以先对两个矩阵进行对称量化变成 Xq 和 Wq，这样就可以将两个浮点类型的矩阵的乘法，转换成两个整数类型的矩阵乘法，提升计算速度，代价就是计算出来的矩阵会出现由于对称量化造成的精度误差。公式如下，其中的两个 s 为两个矩阵的缩放系数:
+$$
+X_f W_f = s_x * X_q @ s_w * W_q = s_x * s_w * (X_q @ W_q)
+$$</p>
+<p><strong>非对称量化并不是以零为中心对称的。</strong> 它将浮点数范围中的最小值（β）和最大值（α）映射到量化范围（quantized range）的最小值和最大值，充分利用量化后的整数范围。</p>
+<p><img alt="image-20250509221020285" src="assets/image-20250509221020285.png" /></p>
+<p>常用的量化方法：</p>
+<ul>
+<li>
+<p><strong>‌bitsandbytes</strong>  ：一个专为深度学习模型量化优化设计的轻量级CUDA函数库‌，用于降低大型语言模型（LLM）的内存占用和计算成本，支持8位和4位量化技术。</p>
+</li>
+<li>
+<p><strong>GPTQ</strong>：一种高效的、逐层校准的 PTQ 方法。它通过对每一层的权重进行二次逼近，最小化量化误差，非常适合生成式大模型，能在 INT4  精度下保持良好性能。</p>
+</li>
+<li><strong>QLoRA</strong>：虽然不是纯粹的量化部署技术，但它将 QAT 的思想用于高效微调。它将预训练模型量化为 4位，然后通过可训练的低秩适配器进行微调，实现了在单张消费级显卡上微调超大模型（如 65B）的突破。</li>
+</ul>
+<h3 id="22">2.2 模型剪枝<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<p>模型剪枝是一种模型优化技术，可以使神经网络更小、计算效率更高。其核心思想是从训练好的模型中识别并删除冗余或不重要的参数（权重）或结构（神经元）。这个过程减少了模型的大小，并能显著加快推理速度，使其非常适合在内存和处理能力有限的边缘设备上部署。</p>
+<p><img src="assets/image-20251105155327259.png" alt="image-20251105155327259" style="zoom:80%;" /></p>
+<p>剪枝的流程是“<strong>剪枝-微调-评估-再剪枝</strong>”的循环过程，如下图所示：</p>
+<p><img src="assets/image-20251105155706672.png" alt="image-20251105155706672" style="zoom:80%;" /></p>
+<p><strong>1.神经元重要性判别</strong>  ：评估网络中每一个神经元（或者通道、注意力头等结构化组件）对于模型最终输出的“重要性”或“贡献度”。得到一个所有神经元的重要性排名列表。</p>
+<p><strong>2.去除神经元</strong> ：根据上一步的评估结果，移除最不重要的神经元。。</p>
+<p><strong>3. 微调</strong> ：使用原始的训练数据或部分数据，对剪枝后的、更小的网络进行几个周期的训练。修复因剪枝而造成的模型性能（精度）下降。</p>
+<p><strong>4. 继续剪枝？</strong> 如果还没有达到预设的目标（例如，参数减少50%，或FLOPs减少40%，或精度损失超过可接受阈值），则返回步骤1，开始下一轮迭代。如果已经达到了满意的压缩率和性能，则结束流程。</p>
+<h3 id="23">2.3 知识蒸馏<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<p>模型蒸馏（Model Distillation）是一种将大型、复杂模型（通常称为“教师模型”）的知识转移到小型、简单模型（通常称为“学生模型”）的技术。其核心思想是通过模仿教师模型的输出，使学生模型在保持较高性能的同时，显著减少模型的大小和计算复杂度。</p>
+<p><img src="assets/image-20251105161955395.png" alt="image-20251105161955395" style="zoom:50%;" /></p>
+<p><strong>1.准备教师模型</strong>：在一个大型数据集上训练一个高性能、高容量的大模型（如 BERT-Large, GPT-3）。此模型已收敛，性能优异。</p>
+<p><strong>2. 构建学生模型</strong>：</p>
+<ul>
+<li>设计一个结构更小、参数更少的模型（如 BERT-Tiny, DistilBERT）。</li>
+<li>学生模型的架构可以与教师相同（等比例缩小），也可以完全不同。</li>
+</ul>
+<p><strong>3.执行蒸馏训练</strong>：</p>
+<ul>
+<li>对于同一批训练数据，让教师模型和学生模型分别进行前向传播。</li>
+<li>教师模型使用高温度 T 产生软标签。</li>
+<li>学生模型也使用相同的温度 T 产生软预测，同时也会产生硬预测（T=1）。</li>
+<li>通过反向传播和优化器，<strong>只更新学生模型的参数</strong>。教师模型的参数是冻结的。</li>
+</ul>
+<p><strong>4.输出学生模型</strong>：训练完成后，得到一个独立的小型学生模型，用于部署。在推理时，温度 T 被重置为 1。</p>
+<p>DeepSeekR1模型：</p>
+<p><img src="assets/image-20251105162327984.png" alt="image-20251105162327984" style="zoom:80%;" /></p>
+<p>DeepSeekR1蒸馏的模型：</p>
+<p><img src="assets/image-20251105162409920.png" alt="image-20251105162409920" style="zoom:80%;" /></p>
+<h2 id="3">3.总结<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p><strong>1. 模型压缩的目标</strong> ：在尽可能保持模型性能的前提下，显著减少模型的大小、降低计算需求、提升推理速度。</p>
+<p><strong>2. 模型压缩的意义</strong></p>
+<ul>
+<li>硬件限制</li>
+<li>推理延迟</li>
+<li>能耗与成本高</li>
+<li>无法端侧部署</li>
+</ul>
+<p><strong>3. 模型压缩方法</strong> ：量化、剪枝和蒸馏</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+        <script src="../js/extra.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+  </body>
+</html>

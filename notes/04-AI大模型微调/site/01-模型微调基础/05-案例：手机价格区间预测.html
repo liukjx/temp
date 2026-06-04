@@ -1,0 +1,1098 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="04-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B.html">
+      
+      
+        <link rel="next" href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-HuggingFace.html">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
+    
+    
+      
+        <title>1.5 案例：手机价格区间预测 - 大模型微调</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#15" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="大模型微调" class="md-header__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            大模型微调
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              1.5 案例：手机价格区间预测
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="大模型微调" class="md-nav__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    大模型微调
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1:模型微调基础
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            1:模型微调基础
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-AI%E9%A1%B9%E7%9B%AE%E8%90%BD%E5%9C%B0%E7%9A%84%E7%97%9B%E7%82%B9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.1 AI项目落地的痛点
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-%E5%BE%AE%E8%B0%83%E7%9A%84%E9%98%B6%E6%AE%B5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.2 微调的阶段
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.3 环境搭建
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.4 模型训练核心流程
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    1.5 案例：手机价格区间预测
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="05-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%89%8B%E6%9C%BA%E4%BB%B7%E6%A0%BC%E5%8C%BA%E9%97%B4%E9%A2%84%E6%B5%8B.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    1.5 案例：手机价格区间预测
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.案例介绍
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 构建数据集
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 构建网络模型
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. 模型训练
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. 模型预测效果
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2:AE模型(BERT系列)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            2:AE模型(BERT系列)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-HuggingFace.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.1 HuggingFace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.2 案例：中文文本分类微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3:AR模型(大模型)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            3:AR模型(大模型)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E7%AD%96%E7%95%A5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.1 大模型微调策略
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-PEFT%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.2 PEFT微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/03-%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8ELLaMaFactory%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%AE%9E%E6%88%98.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.3 案例：基于LLaMa-Factory大模型微调实战
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4:模型压缩
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            4:模型压缩
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/01-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.1 模型压缩
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E5%89%8D%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.2 案例：量化前Qwen和量化后Qwen int4的对比
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.案例介绍
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 构建数据集
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 构建网络模型
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. 模型训练
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. 模型预测效果
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="15">1.5 案例：手机价格区间分类<a class="headerlink" href="#15" title="Permanent link">&para;</a></h1>
+<p>在上一章节中我们介绍了深度学习模型训练的全流程，包括数据准备、模型选择、训练优化、拟合状态分析和预测应用。核心内容涵盖数据划分与表示、神经网络构建、损失函数与优化器、训练步骤以及防止过拟合的方法。接下来我们通过以下案例来实践下：</p>
+<h2 id="1">1.案例介绍<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>Jones创办了一家二手手机公司，他不知道如何估算手机产品的价格。为了解决这个问题，他收集了多家公司的手机销售数据。该数据为二手手机的各个性能的数据，最后根据这些性能得到4个价格区间，作为这些二手手机售出的价格区间。主要包括：</p>
+<div class="highlight"><pre><span></span><code><span class="n">battery_power</span><span class="err">：</span><span class="n">电池一次可储存的总能量</span><span class="err">，</span><span class="n">单位为毫安时</span>
+<span class="n">blue</span> <span class="err">：</span><span class="n">是否有蓝牙</span>
+<span class="n">clock_speed</span><span class="err">：</span><span class="n">微处理器执行指令的速度</span>
+<span class="n">dual_sim</span><span class="err">：</span><span class="n">是否支持双卡</span>
+<span class="n">fc</span><span class="err">：</span><span class="n">前置摄像头百万像素</span>
+<span class="n">four_g</span><span class="err">：</span><span class="n">是否有4G</span>
+<span class="n">int_memory</span><span class="err">：</span><span class="n">内存</span><span class="err">（</span><span class="n">GB</span><span class="err">）</span>
+<span class="n">m_dep</span><span class="err">：</span><span class="n">移动深度</span><span class="err">（</span><span class="n">cm</span><span class="err">）</span>
+<span class="n">mobile_wt</span><span class="err">：</span><span class="n">手机重量</span>
+<span class="n">n_cores</span><span class="err">：</span><span class="n">处理器内核数</span>
+<span class="n">pc</span><span class="err">：</span><span class="n">主摄像头百万像素</span>
+<span class="n">px_height</span><span class="err">：</span><span class="n">像素分辨率高度</span>
+<span class="n">px_width</span><span class="err">：</span><span class="n">像素分辨率宽度</span>
+<span class="n">ram</span><span class="err">：</span><span class="n">随机存取存储器</span><span class="err">（</span><span class="n">兆字节</span><span class="err">）</span>
+<span class="n">sc_h</span><span class="err">：</span><span class="n">手机屏幕高度</span><span class="err">（</span><span class="n">cm</span><span class="err">）</span>
+<span class="n">sc_w</span><span class="err">：</span><span class="n">手机屏幕宽度</span><span class="err">（</span><span class="n">cm</span><span class="err">）</span>
+<span class="n">talk_time</span><span class="err">：</span><span class="n">一次电池充电持续时间最长的时间</span>
+<span class="n">three_g</span><span class="err">：</span><span class="n">是否有3G</span>
+<span class="n">touch_screen</span><span class="err">：</span><span class="n">是否有触控屏</span>
+<span class="n">wifi</span><span class="err">：</span><span class="n">是否能连wifi</span>
+<span class="n">price_range</span><span class="err">：</span><span class="n">价格区间</span><span class="err">（</span><span class="mi">0</span><span class="err">，</span><span class="mi">1</span><span class="err">，</span><span class="mi">2</span><span class="err">，</span><span class="mi">3</span><span class="err">）</span>
+</code></pre></div>
+<p>我们需要帮助Jones找出手机的功能（例如：RAM等）与其售价之间的某种关系。我们可以使用机器学习的方法来解决这个问题，也可以构建一个全连接的网络。</p>
+<p>需要注意的是: 在这个问题中，我们不需要预测实际价格，而是一个价格范围，它的范围使用 0、1、2、3 来表示，所以该问题也是一个分类问题。接下来我们还是按照四个步骤来完成这个任务：</p>
+<ul>
+<li>准备训练集数据</li>
+<li>构建要使用的模型</li>
+<li>模型训练</li>
+<li>模型预测评估</li>
+</ul>
+<p>该项目所需的工具包：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">TensorDataset</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.optim</span> <span class="k">as</span> <span class="nn">optim</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_regression</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">time</span>
+</code></pre></div>
+<h2 id="2">2. 构建数据集<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>数据共有 2000 条, 其中 1600 条数据作为训练集, 400 条数据用作测试集。 我们使用 sklearn 的数据集划分工作来完成。并使用 PyTorch 的 TensorDataset 来将数据集构建为 Dataset 对象，方便构造数据集加载对象。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 构建数据集</span>
+<span class="k">def</span> <span class="nf">create_dataset</span><span class="p">():</span>
+    <span class="c1"># 使用pandas读取数据</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;data/手机价格预测.csv&#39;</span><span class="p">)</span>
+
+    <span class="c1"># 特征值和目标值</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># 类型转换：特征值，目标值</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+
+    <span class="c1"># 数据集划分</span>
+    <span class="n">x_train</span><span class="p">,</span> <span class="n">x_valid</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_valid</span> <span class="o">=</span> \
+        <span class="n">train_test_split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">88</span><span class="p">)</span>
+
+    <span class="c1"># 构建数据集,转换为pytorch的形式</span>
+    <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">x_train</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_train</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+    <span class="n">valid_dataset</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">x_valid</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">y_valid</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+    <span class="c1"># 返回结果:训练集数据，验证集数据，样本特征维度和目标分类个数</span>
+    <span class="k">return</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">,</span> <span class="n">x_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+</code></pre></div>
+<p>获取数据的结果：</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># 获取数据</span>
+    <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span> <span class="o">=</span> <span class="n">create_dataset</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;输入特征数：&quot;</span><span class="p">,</span><span class="n">input_dim</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;分类个数：&quot;</span><span class="p">,</span><span class="n">class_num</span><span class="p">)</span>
+</code></pre></div>
+<p>结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="n">输入特征数</span><span class="err">：</span> <span class="mi">20</span>
+<span class="n">分类个数</span><span class="err">：</span> <span class="mi">4</span>
+</code></pre></div>
+<h2 id="3">3. 构建网络模型<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p>构建全连接神经网络来进行手机价格分类，该网络主要由三个线性层来构建，使用relu激活函数。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 构建网络模型</span>
+<span class="k">class</span> <span class="nc">PhonePriceModel</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PhonePriceModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># 1. 第一层: 输入为维度为 20, 输出维度为: 128</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span>
+        <span class="c1"># 2. 第二层: 输入为维度为 128, 输出维度为: 256</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
+        <span class="c1"># 3. 第三层: 输入为维度为 256, 输出维度为: 4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># 前向传播过程</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># 获取数据结果</span>
+        <span class="k">return</span> <span class="n">output</span>
+</code></pre></div>
+<p>模型实例化为：</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># 获取数据</span>
+    <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span> <span class="o">=</span> <span class="n">create_dataset</span><span class="p">()</span>
+    <span class="c1"># 模型实例化</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PhonePriceModel</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span><span class="p">)</span>
+    <span class="n">summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="n">input_size</span><span class="o">=</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,),</span><span class="n">batch_size</span><span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+</code></pre></div>
+<p>模型参数为：</p>
+<div class="highlight"><pre><span></span><code><span class="o">----------------------------------------------------------------</span>
+        <span class="n">Layer</span> <span class="p">(</span><span class="nb">type</span><span class="p">)</span>               <span class="n">Output</span> <span class="n">Shape</span>         <span class="n">Param</span> <span class="c1">#</span>
+<span class="o">================================================================</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">1</span>                  <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">128</span><span class="p">]</span>           <span class="mi">2</span><span class="p">,</span><span class="mi">688</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">2</span>                  <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">256</span><span class="p">]</span>          <span class="mi">33</span><span class="p">,</span><span class="mi">024</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">3</span>                    <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>           <span class="mi">1</span><span class="p">,</span><span class="mi">028</span>
+<span class="o">================================================================</span>
+<span class="n">Total</span> <span class="n">params</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span><span class="mi">740</span>
+<span class="n">Trainable</span> <span class="n">params</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span><span class="mi">740</span>
+<span class="n">Non</span><span class="o">-</span><span class="n">trainable</span> <span class="n">params</span><span class="p">:</span> <span class="mi">0</span>
+<span class="o">----------------------------------------------------------------</span>
+<span class="n">Input</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Forward</span><span class="o">/</span><span class="n">backward</span> <span class="k">pass</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.05</span>
+<span class="n">Params</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.14</span>
+<span class="n">Estimated</span> <span class="n">Total</span> <span class="n">Size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.19</span>
+<span class="o">----------------------------------------------------------------</span>
+</code></pre></div>
+<h2 id="4">4. 模型训练<a class="headerlink" href="#4" title="Permanent link">&para;</a></h2>
+<p>网络编写完成之后，我们需要编写训练函数。所谓的训练函数，指的是输入数据读取、送入网络、计算损失、更新参数的流程，该流程较为固定。我们使用的是多分类交叉生损失函数、使用 SGD 优化方法。最终，将训练好的模型参数保存到磁盘中，供预测时使用。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 模型训练过程</span>
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">class_num</span><span class="p">,):</span>
+    <span class="c1"># 固定随机数种子</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># 初始化数据加载器</span>
+    <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1"># 初始化模型</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PhonePriceModel</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span><span class="p">)</span>
+    <span class="c1"># 损失函数</span>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+    <span class="c1"># 优化方法</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+    <span class="c1"># 训练轮数</span>
+    <span class="n">num_epoch</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="c1"># 遍历每个轮次的数据</span>
+    <span class="k">for</span> <span class="n">epoch_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epoch</span><span class="p">):</span>
+        <span class="c1"># 训练时间</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># 计算损失</span>
+        <span class="n">total_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">total_num</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># 遍历每个batch数据进行处理</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="c1"># 将数据送入网络中进行预测</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="c1"># 计算损失</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="c1"># 梯度清零</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="c1"># 反向传播</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="c1"># 参数更新</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+            <span class="c1"># 损失计算</span>
+            <span class="n">total_num</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">total_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="c1"># 打印损失变换结果</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;epoch: </span><span class="si">%4s</span><span class="s1"> loss: </span><span class="si">%.2f</span><span class="s1">, time: </span><span class="si">%.2f</span><span class="s1">s&#39;</span> <span class="o">%</span>
+              <span class="p">(</span><span class="n">epoch_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">total_loss</span> <span class="o">/</span> <span class="n">total_num</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+    <span class="c1"># 模型保存</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;model/phone.pth&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>调用训练函数：</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># 获取数据</span>
+    <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span> <span class="o">=</span> <span class="n">create_dataset</span><span class="p">()</span>
+    <span class="c1"># 模型训练过程</span>
+    <span class="n">train</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">class_num</span> <span class="p">)</span>
+</code></pre></div>
+<p>训练结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="n">epoch</span><span class="p">:</span>    <span class="mi">1</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">13.10</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.11</span><span class="n">s</span>
+<span class="n">epoch</span><span class="p">:</span>    <span class="mi">2</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.97</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.09</span><span class="n">s</span>
+<span class="n">epoch</span><span class="p">:</span>    <span class="mi">3</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.92</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.10</span><span class="n">s</span>
+<span class="n">epoch</span><span class="p">:</span>    <span class="mi">4</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.89</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.10</span><span class="n">s</span>
+
+<span class="err">。。。。</span>
+<span class="n">epoch</span><span class="p">:</span>   <span class="mi">48</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.69</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.10</span><span class="n">s</span>
+<span class="n">epoch</span><span class="p">:</span>   <span class="mi">49</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.71</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.09</span><span class="n">s</span>
+<span class="n">epoch</span><span class="p">:</span>   <span class="mi">50</span> <span class="n">loss</span><span class="p">:</span> <span class="mf">0.71</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="mf">0.10</span><span class="n">s</span>
+</code></pre></div>
+<h2 id="5">5. 模型预测效果<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<p>主要使用训练好的模型，对未知的样本的进行预测的过程。我们这里使用前面单独划分出来的验证集来进行评估。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 模型预测结果评估</span>
+<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">class_num</span><span class="p">):</span>
+    <span class="c1"># 加载模型和训练好的网络参数</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PhonePriceModel</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;data/phone.pth&#39;</span><span class="p">))</span>
+    <span class="c1"># 构建加载器</span>
+    <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># 评估测试集</span>
+    <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># 遍历测试集中的数据</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+        <span class="c1">#  将其送入网络中</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># 获取类别结果</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># 获取预测正确的个数</span>
+        <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y_pred</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="c1"># 求预测精度</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Acc: </span><span class="si">%.5f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">correct</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">)))</span>
+</code></pre></div>
+<p>调用模型评估方法：</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># 获取数据</span>
+    <span class="n">train_dataset</span><span class="p">,</span> <span class="n">valid_dataset</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">class_num</span> <span class="o">=</span> <span class="n">create_dataset</span><span class="p">()</span>
+    <span class="c1"># 模型预测结果</span>
+    <span class="n">test</span><span class="p">(</span><span class="n">valid_dataset</span><span class="p">,</span><span class="n">input_dim</span><span class="p">,</span><span class="n">class_num</span><span class="p">)</span>
+</code></pre></div>
+<p>程序输出结果:</p>
+<div class="highlight"><pre><span></span><code><span class="n">Acc</span><span class="p">:</span> <span class="mf">0.55250</span>
+</code></pre></div>
+<h2 id="6">6.总结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>在这一章节中我们通过预测二手手机的价格区间的多分类问题实践了模型训练的整个流程：</p>
+<p><strong>1.数据准备</strong></p>
+<p>使用Pandas读取CSV数据，共2000条样本。并划分数据：</p>
+<ul>
+<li>训练集：80%（1600条）</li>
+<li>验证集：20%（400条）</li>
+</ul>
+<p>并使用<code>TensorDataset</code>和<code>DataLoader</code>构建PyTorch数据加载器。</p>
+<p><strong>2. 模型构建</strong></p>
+<p>使用pytorch构建了4层的 <strong>全连接神经网络</strong> ，包含4个类别的输出层，</p>
+<p><strong>3. 模型训练</strong></p>
+<ul>
+<li><strong>损失函数</strong> ：交叉熵损失（<code>CrossEntropyLoss</code>）</li>
+<li><strong>优化器</strong> ：随机梯度下降（SGD），学习率=0.001</li>
+<li><strong>训练轮数</strong> ：50个epoch</li>
+<li><strong>批大小</strong>： 8</li>
+<li><strong>模型保存</strong> ：训练完成后保存模型参数（<code>phone.pth</code>）</li>
+</ul>
+<p><strong>4. 模型评估</strong></p>
+<p>加载训练好的模型，在验证集上进行预测。并使用功准确率评估模型效果。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+        <script src="../js/extra.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+  </body>
+</html>

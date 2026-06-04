@@ -1,0 +1,3512 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="03-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.html">
+      
+      
+        <link rel="next" href="05-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%89%8B%E6%9C%BA%E4%BB%B7%E6%A0%BC%E5%8C%BA%E9%97%B4%E9%A2%84%E6%B5%8B.html">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.24">
+    
+    
+      
+        <title>1.4 模型训练核心流程 - 大模型微调</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6543a935.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#14" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href=".." title="大模型微调" class="md-header__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            大模型微调
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              1.4 模型训练核心流程
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="大模型微调" class="md-nav__button md-logo" aria-label="大模型微调" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    大模型微调
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    1:模型微调基础
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            1:模型微调基础
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-AI%E9%A1%B9%E7%9B%AE%E8%90%BD%E5%9C%B0%E7%9A%84%E7%97%9B%E7%82%B9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.1 AI项目落地的痛点
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-%E5%BE%AE%E8%B0%83%E7%9A%84%E9%98%B6%E6%AE%B5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.2 微调的阶段
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.3 环境搭建
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    1.4 模型训练核心流程
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="04-%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83%E7%9A%84%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B.html" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    1.4 模型训练核心流程
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.数据准备
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.数据准备">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 数据的组成要素
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 数据划分
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-pytorch" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.3 pytorch中的数据表示
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4 文本预处理
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.4 文本预处理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4.1 分词
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4.2 词表构建
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5 词向量
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.5 词向量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-one-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5.1 one-hot编码
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5.2 词嵌入
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5.3【扩展】大模型中的词向量
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 模型选择
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 模型选择">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1 什么是神经网络
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2 激活函数
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 激活函数">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#221" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.1 激活函数的作用
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#222" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2 常见的激活函数
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2.2 常见的激活函数">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2221-sigmoid" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.1 sigmoid 激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2222-tanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.2 tanh 激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2223-relu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.3 ReLU 激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2224-gelu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.4 Gelu激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2225-softmax" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.5 SoftMax
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#223" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.3 其他激活函数及激活函数的选择方法
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3 神经网络搭建和参数计算
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 神经网络搭建和参数计算">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#231" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.1 构建简单神经网络
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#232" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.2 输入数据和输出数据分析
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#233" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.3 模型参数分析
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#234-transformer" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.4 transformer模型
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.4 transformer模型">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. 输入
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2ae" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.编码器（AE模型）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ar" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 解码器（AR模型）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. 输出
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-bert" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Bert中模型架构
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 模型训练
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 模型训练">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1 损失函数
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 损失函数">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1.1 交叉熵损失
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1.2 二分类交叉熵
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2 优化器
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 优化器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#321" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.1 梯度下降算法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#322-bp" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.2 反向传播(BP算法)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#323" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.3 梯度下降的优化方法
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2.3 梯度下降的优化方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3231" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.3.1.指数移动加权平均
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3232-adam" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.3.2. Adam
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3 评估方法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-pytorch" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4 pytorch中模型训练
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 pytorch中模型训练">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#341" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.1 数据处理
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#342" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.2 模型构建
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#343-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.3 优化器（Optimizer）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#344-loss-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.4 损失函数（Loss Function）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#345-epoch-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.5 训练循环（Epoch 和 Batch）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#346" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.6 训练步骤
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#347" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.7 模型验证
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#348" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.8 保存模型
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.拟合
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.拟合">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1 欠拟合
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2 正好拟合
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3 过拟合
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 过拟合">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-dropout" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3.1. Dropout正则化
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#432-norm" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3.2 规范化(Norm层)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.模型预测
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05-%E6%A1%88%E4%BE%8B%EF%BC%9A%E6%89%8B%E6%9C%BA%E4%BB%B7%E6%A0%BC%E5%8C%BA%E9%97%B4%E9%A2%84%E6%B5%8B.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    1.5 案例：手机价格区间预测
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    2:AE模型(BERT系列)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            2:AE模型(BERT系列)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-HuggingFace.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.1 HuggingFace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02-AE%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E4%B8%AD%E6%96%87%E6%96%87%E6%9C%AC%E5%88%86%E7%B1%BB%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    2.2 案例：中文文本分类微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    3:AR模型(大模型)微调
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            3:AR模型(大模型)微调
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/01-%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E7%AD%96%E7%95%A5.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.1 大模型微调策略
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/02-PEFT%E5%BE%AE%E8%B0%83.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.2 PEFT微调
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03-AR%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83/03-%E6%A1%88%E4%BE%8B%EF%BC%9A%E5%9F%BA%E4%BA%8ELLaMaFactory%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%BE%AE%E8%B0%83%E5%AE%9E%E6%88%98.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    3.3 案例：基于LLaMa-Factory大模型微调实战
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    4:模型压缩
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            4:模型压缩
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/01-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.1 模型压缩
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04-%E6%A8%A1%E5%9E%8B%E5%8E%8B%E7%BC%A9/02-%E6%A1%88%E4%BE%8B%EF%BC%9A%E9%87%8F%E5%8C%96%E5%89%8D%E5%90%8E%E6%A8%A1%E5%9E%8B%E5%AF%B9%E6%AF%94.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    4.2 案例：量化前Qwen和量化后Qwen int4的对比
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.数据准备
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.数据准备">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.1 数据的组成要素
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.2 数据划分
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-pytorch" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.3 pytorch中的数据表示
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4 文本预处理
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.4 文本预处理">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4.1 分词
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.4.2 词表构建
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5 词向量
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.5 词向量">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-one-hot" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5.1 one-hot编码
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#152" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5.2 词嵌入
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#153" class="md-nav__link">
+    <span class="md-ellipsis">
+      1.5.3【扩展】大模型中的词向量
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 模型选择
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. 模型选择">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.1 什么是神经网络
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2 激活函数
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2 激活函数">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#221" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.1 激活函数的作用
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#222" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2 常见的激活函数
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.2.2 常见的激活函数">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2221-sigmoid" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.1 sigmoid 激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2222-tanh" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.2 tanh 激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2223-relu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.3 ReLU 激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2224-gelu" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.4 Gelu激活函数
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2225-softmax" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.2.5 SoftMax
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#223" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.2.3 其他激活函数及激活函数的选择方法
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3 神经网络搭建和参数计算
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3 神经网络搭建和参数计算">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#231" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.1 构建简单神经网络
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#232" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.2 输入数据和输出数据分析
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#233" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.3 模型参数分析
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#234-transformer" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.3.4 transformer模型
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2.3.4 transformer模型">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. 输入
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2ae" class="md-nav__link">
+    <span class="md-ellipsis">
+      2.编码器（AE模型）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ar" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 解码器（AR模型）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. 输出
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-bert" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Bert中模型架构
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 模型训练
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 模型训练">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1 损失函数
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 损失函数">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1.1 交叉熵损失
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.1.2 二分类交叉熵
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2 优化器
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 优化器">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#321" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.1 梯度下降算法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#322-bp" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.2 反向传播(BP算法)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#323" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.3 梯度下降的优化方法
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2.3 梯度下降的优化方法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3231" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.3.1.指数移动加权平均
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3232-adam" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.2.3.2. Adam
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.3 评估方法
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-pytorch" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4 pytorch中模型训练
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 pytorch中模型训练">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#341" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.1 数据处理
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#342" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.2 模型构建
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#343-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.3 优化器（Optimizer）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#344-loss-function" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.4 损失函数（Loss Function）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#345-epoch-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.5 训练循环（Epoch 和 Batch）
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#346" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.6 训练步骤
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#347" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.7 模型验证
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#348" class="md-nav__link">
+    <span class="md-ellipsis">
+      3.4.8 保存模型
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.拟合
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.拟合">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.1 欠拟合
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.2 正好拟合
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3 过拟合
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.3 过拟合">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#431-dropout" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3.1. Dropout正则化
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#432-norm" class="md-nav__link">
+    <span class="md-ellipsis">
+      4.3.2 规范化(Norm层)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      5.模型预测
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      6.总结
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="14">1.4 模型训练的核心流程<a class="headerlink" href="#14" title="Permanent link">&para;</a></h1>
+<p>模型训练是一个通过使用与模型最终应用场景紧密相关的 <strong>样本任务数据集</strong> 【训练集】，来“教导”机器学习模型以提升【优化】其性能的关键过程。当训练数据与模型在实际应用中需要处理的问题高度契合时，模型便能深入学习数据中的内在模式和相关性。这种深入学习使得经过充分训练的模型在面对新数据时【模型预测】，能够展现出卓越的预测准确性，从而有效应对实际挑战。</p>
+<p>模型训练的主要流程一般包括以下步骤：</p>
+<p><strong>1. 数据准备</strong></p>
+<p><code>torch.utils.data.Dataset</code> ：存储数据样本及其对应的标签</p>
+<p><code>torch.utils.data.Dataloader</code>  ：包装了一个可迭代对象</p>
+<p><strong>2. 模型选择</strong></p>
+<p><code>torch.nn</code> ：构建不同的模型</p>
+<p><strong>3. 利用数据训练模型</strong></p>
+<ul>
+<li><strong>3.1 计算损失</strong> </li>
+</ul>
+<p><code>CrossEntropyLoss</code>  ：定义损失函数</p>
+<ul>
+<li><strong>3.2 优化参数（模型学习/训练过程）</strong> </li>
+</ul>
+<p><code>Torch.optim</code> ：提供了各种优化方法</p>
+<ul>
+<li><strong>3.3 模型评估</strong></li>
+</ul>
+<p><code>autograd</code>：自动梯度计算。</p>
+<ul>
+<li><strong>3.4 模型保存</strong></li>
+</ul>
+<p><code>torch.save</code> ：保存模型参数</p>
+<p><strong>4. 拟合状态</strong></p>
+<p><strong>5.模型预测</strong></p>
+<p>接下来，我们按照上述流程来对模型训练的整个流程进行详细的讲述。</p>
+<h2 id="1">1.数据准备<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>在深度学习中，模型从数据中进行学习，数据定义了模型的知识边界，决定了模型的性能上限，所以数据在深度学习中的决定性作用。</p>
+<h3 id="11">1.1  数据的组成要素<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
+<p>波士顿房价预测任务根据房屋的各项特征，预测该房屋的中位价格。数据来源于20世纪70年代波士顿周边地区的房屋数据。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">数据组成</th>
+<th style="text-align: left;">说明</th>
+<th style="text-align: left;">示例（波士顿房价）</th>
+<th style="text-align: left;">特征描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>特征</strong></td>
+<td style="text-align: left;">模型的输入数据</td>
+<td style="text-align: left;">犯罪率、房间数、学区评分等</td>
+<td style="text-align: left;">结构化数据或文本数据</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>标签/目标值</strong></td>
+<td style="text-align: left;">模型输出结果</td>
+<td style="text-align: left;">房屋价格（单位：千美元）</td>
+<td style="text-align: left;">目标值</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>样本</strong></td>
+<td style="text-align: left;">包含特征和标签的完整数据记录</td>
+<td style="text-align: left;">一条完整的房屋信息记录</td>
+<td style="text-align: left;">数据的基本单元</td>
+</tr>
+</tbody>
+</table>
+<p>以波士顿房价预测数据集为例：</p>
+<p><img alt="image-20251017082932224" src="assets/image-20251017082932224.png" /></p>
+<p><strong>样本数量</strong>： 506条</p>
+<p><strong>特征</strong>：共有13个，如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">特征名</th>
+<th style="text-align: left;">全称</th>
+<th style="text-align: left;">中文解释</th>
+<th style="text-align: left;">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">CRIM</td>
+<td style="text-align: left;">Crime Rate</td>
+<td style="text-align: left;">城镇人均犯罪率</td>
+<td style="text-align: left;">数值越大，治安越差</td>
+</tr>
+<tr>
+<td style="text-align: left;">ZN</td>
+<td style="text-align: left;">Zoning</td>
+<td style="text-align: left;">住宅用地比例</td>
+<td style="text-align: left;">数值越大，大型住宅区越多</td>
+</tr>
+<tr>
+<td style="text-align: left;">INDUS</td>
+<td style="text-align: left;">Industry</td>
+<td style="text-align: left;">非零售业务用地比例</td>
+<td style="text-align: left;">数值越大，工业/商业区越多</td>
+</tr>
+<tr>
+<td style="text-align: left;">CHAS</td>
+<td style="text-align: left;">Charles River</td>
+<td style="text-align: left;">查尔斯河虚拟变量</td>
+<td style="text-align: left;">1=临河，0=不临河 (景观因素)</td>
+</tr>
+<tr>
+<td style="text-align: left;">NOX</td>
+<td style="text-align: left;">Nitric Oxides</td>
+<td style="text-align: left;">一氧化氮浓度</td>
+<td style="text-align: left;">数值越大，空气质量越差</td>
+</tr>
+<tr>
+<td style="text-align: left;">RM</td>
+<td style="text-align: left;">Rooms</td>
+<td style="text-align: left;">每套住宅的平均房间数</td>
+<td style="text-align: left;">核心特征，通常与房价正相关</td>
+</tr>
+<tr>
+<td style="text-align: left;">AGE</td>
+<td style="text-align: left;">Age</td>
+<td style="text-align: left;">1940年前建造的房屋比例</td>
+<td style="text-align: left;">数值越大，社区越老旧</td>
+</tr>
+<tr>
+<td style="text-align: left;">DIS</td>
+<td style="text-align: left;">Distance</td>
+<td style="text-align: left;">到波士顿就业中心的距离</td>
+<td style="text-align: left;">数值越大，离市中心越远</td>
+</tr>
+<tr>
+<td style="text-align: left;">RAD</td>
+<td style="text-align: left;">Highway Access</td>
+<td style="text-align: left;">径向公路可达性指数</td>
+<td style="text-align: left;">数值越大，交通越便利</td>
+</tr>
+<tr>
+<td style="text-align: left;">TAX</td>
+<td style="text-align: left;">Tax</td>
+<td style="text-align: left;">每万美元的全额财产税</td>
+<td style="text-align: left;">数值越大，税负越高</td>
+</tr>
+<tr>
+<td style="text-align: left;">PTRATIO</td>
+<td style="text-align: left;">Pupil-Teacher Ratio</td>
+<td style="text-align: left;">城镇师生比例</td>
+<td style="text-align: left;">数值越大，教育资源越紧张</td>
+</tr>
+<tr>
+<td style="text-align: left;">B</td>
+<td style="text-align: left;">Black Proportion</td>
+<td style="text-align: left;">黑人比例指数</td>
+<td style="text-align: left;">用于反映当时的社会经济状况</td>
+</tr>
+<tr>
+<td style="text-align: left;">LSTAT</td>
+<td style="text-align: left;">Lower Status</td>
+<td style="text-align: left;">人口中低收入阶层百分比</td>
+<td style="text-align: left;">核心特征，通常与房价负相关</td>
+</tr>
+</tbody>
+</table>
+<p><strong>目标变量</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>名字</th>
+<th>全称</th>
+<th>中文解释</th>
+<th>全称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MEDV</strong></td>
+<td>Median Value</td>
+<td>房屋的中位价格</td>
+<td>目标值，单位：千美元</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12">1.2 数据划分<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
+<p>数据集划分通过合理分配数据至训练、验证和测试集，以支持模型有效训练、优化参数、评估性能并确保泛化能力。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">数据集类型</th>
+<th style="text-align: left;">主要用途</th>
+<th style="text-align: left;">占比</th>
+<th style="text-align: left;">理解</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>训练集</strong></td>
+<td style="text-align: left;">模型学习的数据，用于训练模型参数</td>
+<td style="text-align: left;">60-80%</td>
+<td style="text-align: left;">教科书与课堂练习</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>验证集</strong></td>
+<td style="text-align: left;">验证模型效果，选择最佳模型</td>
+<td style="text-align: left;">10-20%</td>
+<td style="text-align: left;">模拟考试与作业</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>测试集</strong></td>
+<td style="text-align: left;">最终评估模型性能</td>
+<td style="text-align: left;">10-20%</td>
+<td style="text-align: left;">最终高考</td>
+</tr>
+</tbody>
+</table>
+<p>假设我们将波士顿房价数据集进行划分：</p>
+<ul>
+<li><strong>训练集 (70%)</strong>：354条数据 → 用于训练模型学习房价与各种特征（房间数、犯罪率等）的关系。</li>
+<li><strong>验证集 (15%)</strong>：76条数据 → 用于验证模型效果。</li>
+<li><strong>测试集 (15%)</strong>：76条数据 → 最终评估模型效果。</li>
+</ul>
+<p><strong>注意：</strong> 实际工作中，由于数据量不足，数据集划分为训练集（80%）和测试集（20%）</p>
+<h3 id="13-pytorch">1.3 pytorch中的数据表示<a class="headerlink" href="#13-pytorch" title="Permanent link">&para;</a></h3>
+<p>对于任何人工智能模型，即使是用于表面上非数字信息（如声音或图像）的算法，数据也必须以数字形式表征。PyTorch 则通过张量实现数据表征，张量是pytorch计算的数据的基本单位。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>  <span class="c1"># pip install numpy</span>
+</code></pre></div>
+<p>张量是一个多维数字数组：</p>
+<ul>
+<li>标量是一种零维张量，包含一个数字。</li>
+</ul>
+<p><img alt="image-20251017111338872" src="assets/image-20251017111338872.png" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data_tensor</span> <span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>向量是一种一维张量，包含多个相同类型的标量。</li>
+</ul>
+<p><img src="assets/image-20251017111406877.png" alt="image-20251017111406877" style="zoom:50%;" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mf">4.5</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="o">-</span><span class="mi">6</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>矩阵是一种二维张量，包含多个相同类型的向量。</li>
+</ul>
+<p><img src="assets/image-20251017111424257.png" alt="image-20251017111424257" style="zoom:50%;" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">data_tensor</span><span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_np</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">)</span>
+</code></pre></div>
+<ul>
+<li>具有三个或更多维度的张量统称为 N 维张量。</li>
+</ul>
+<p><img src="assets/image-20251017111438252.png" alt="image-20251017111438252" style="zoom:50%;" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">data_tensor</span><span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_np</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">)</span>
+</code></pre></div>
+<p>如果我们将上述三维张量表示为：</p>
+<p><img src="assets/image-20251017111600948.png" alt="image-20251017111600948" style="zoom:50%;" /></p>
+<p>那四维张量就是：</p>
+<p><img src="assets/image-20251017111511236.png" alt="image-20251017111511236" style="zoom:50%;" /></p>
+<div class="highlight"><pre><span></span><code><span class="n">data_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">data_tensor</span><span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data_np</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data_tensor</span><span class="p">)</span>
+</code></pre></div>
+<p>更高维的张量可以通过低维张量拼接而成，</p>
+<p>PyTorch 张量的可以在GPU上运行。GPU 的计算速度比 CPU 快得多，深度学习常见的海量数据和并行处理，这是一个主要优势。</p>
+<p>使用训练深度学习模型所需的大型数据集可能非常复杂且计算要求较高。PyTorch 提供两种数据处理的方法：数据集和数据加载器，以方便数据加载并使代码更易于阅读。</p>
+<ul>
+<li><em>torch.utils.data.Dataset</em> 存储数据特征及对应标签</li>
+<li><em>torch.utils.data.Dataloader</em> 在数据集周围包装了一个可迭代对象（可以对其进行操作的对象），以便轻松访问样本</li>
+</ul>
+<p>这两个内容到后续的课程中进行详细的说明。</p>
+<h3 id="14_1">1.4 文本预处理<a class="headerlink" href="#14_1" title="Permanent link">&para;</a></h3>
+<p>文本数据的形式如下所示：</p>
+<p><img alt="image-20251017114222279" src="assets/image-20251017114222279.png" /></p>
+<p>要处理文本数据的话，也需要将其转换为数字形式。处理方式：分词-&gt;构建词表 后再转换为词向量。</p>
+<h4 id="141">1.4.1 分词<a class="headerlink" href="#141" title="Permanent link">&para;</a></h4>
+<p>分词就是将连续的字序列按照一定的规范重新组合成词序列的过程。在英文的行文中，单词之间是以空格作为自然分界符的，而中文只是字、句和段能通过明显的分界符来简单划界，唯独词没有一个形式上的分界符。分词过程就是找到这样分界符的过程。</p>
+<p>例如：</p>
+<div class="highlight"><pre><span></span><code><span class="n">传智教育是一家上市公司</span><span class="err">，</span><span class="n">旗下有黑马程序员品牌</span><span class="err">。</span><span class="n">我是在黑马这里学习人工智能</span>
+
+<span class="p">[</span><span class="s1">&#39;传智&#39;</span><span class="p">,</span> <span class="s1">&#39;教育&#39;</span><span class="p">,</span> <span class="s1">&#39;是&#39;</span><span class="p">,</span> <span class="s1">&#39;一家&#39;</span><span class="p">,</span> <span class="s1">&#39;上市公司&#39;</span><span class="p">,</span> <span class="s1">&#39;，&#39;</span><span class="p">,</span> <span class="s1">&#39;旗下&#39;</span><span class="p">,</span> <span class="s1">&#39;有&#39;</span><span class="p">,</span> <span class="s1">&#39;黑马&#39;</span><span class="p">,</span> <span class="s1">&#39;程序员&#39;</span><span class="p">,</span> <span class="s1">&#39;品牌&#39;</span><span class="p">,</span> <span class="s1">&#39;。&#39;</span><span class="p">,</span> <span class="s1">&#39;我&#39;</span><span class="p">,</span> <span class="s1">&#39;是&#39;</span><span class="p">,</span> <span class="s1">&#39;在&#39;</span><span class="p">,</span> <span class="s1">&#39;黑马&#39;</span><span class="p">,</span> <span class="s1">&#39;这里&#39;</span><span class="p">,</span> <span class="s1">&#39;学习&#39;</span><span class="p">,</span> <span class="s1">&#39;人工智能&#39;</span><span class="p">]</span>
+</code></pre></div>
+<p>Jieba（"结巴"）是一个开源的Python中文分词工具包，安装方法：</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>jieba<span class="w"> </span>-i<span class="w"> </span>https://pypi.mirrors.ustc.edu.cn/simple/
+</code></pre></div>
+<p>使用方法：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jieba</span>
+<span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;传智教育是一家上市公司，旗下有黑马程序员品牌。我是在黑马这里学习人工智能&quot;</span>
+
+<span class="c1">#  使用jieba.lcut即可</span>
+<span class="n">word_list</span> <span class="o">=</span> <span class="n">jieba</span><span class="o">.</span><span class="n">lcut</span><span class="p">(</span><span class="n">sentence</span><span class="o">=</span><span class="n">content</span><span class="p">)</span>
+<span class="p">[</span><span class="s1">&#39;传智&#39;</span><span class="p">,</span> <span class="s1">&#39;教育&#39;</span><span class="p">,</span> <span class="s1">&#39;是&#39;</span><span class="p">,</span> <span class="s1">&#39;一家&#39;</span><span class="p">,</span> <span class="s1">&#39;上市公司&#39;</span><span class="p">,</span> <span class="s1">&#39;，&#39;</span><span class="p">,</span> <span class="s1">&#39;旗下&#39;</span><span class="p">,</span> <span class="s1">&#39;有&#39;</span><span class="p">,</span> <span class="s1">&#39;黑马&#39;</span><span class="p">,</span> <span class="s1">&#39;程序员&#39;</span><span class="p">,</span> <span class="s1">&#39;品牌&#39;</span><span class="p">,</span> <span class="s1">&#39;。&#39;</span><span class="p">,</span> <span class="s1">&#39;我&#39;</span><span class="p">,</span> <span class="s1">&#39;是&#39;</span><span class="p">,</span> <span class="s1">&#39;在&#39;</span><span class="p">,</span> <span class="s1">&#39;黑马&#39;</span><span class="p">,</span> <span class="s1">&#39;这里&#39;</span><span class="p">,</span> <span class="s1">&#39;学习&#39;</span><span class="p">,</span> <span class="s1">&#39;人工智能&#39;</span><span class="p">]</span>
+</code></pre></div>
+<h4 id="142">1.4.2 词表构建<a class="headerlink" href="#142" title="Permanent link">&para;</a></h4>
+<p>词表是一个将语言中的单词（或子词）映射到唯一整数ID的字典。计算机无法直接处理文本，必须将文本转换为数字形式。词表就是这个转换的“桥梁。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">词语</th>
+<th style="text-align: left;">ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">传智</td>
+<td style="text-align: left;">0</td>
+</tr>
+<tr>
+<td style="text-align: left;">教育</td>
+<td style="text-align: left;">1</td>
+</tr>
+<tr>
+<td style="text-align: left;">是</td>
+<td style="text-align: left;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">一家</td>
+<td style="text-align: left;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">上市公司</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">，</td>
+<td style="text-align: left;">5</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>...</code></td>
+<td style="text-align: left;">...</td>
+</tr>
+</tbody>
+</table>
+<p>构建词表的基本流程：</p>
+<ol>
+<li><strong>文本收集与加载</strong>：读取所有训练语料（数据集）。</li>
+<li><strong>文本预处理</strong>：分词。</li>
+<li><strong>统计词频</strong>：遍历所有分词后的文本，统计每个词出现的次数。</li>
+<li><strong>选择词汇</strong>：根据词频排序，选择前N个最常用的词。</li>
+<li><strong>生成映射字典</strong>：创建 <code>word -&gt; id</code> 和 <code>id -&gt; word</code> 的映射。</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jieba</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="k">def</span> <span class="nf">build_vocabulary</span><span class="p">(</span><span class="n">texts</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="c1"># 统计词频</span>
+    <span class="n">word_freq</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+    <span class="c1"># 遍历每一条样本</span>
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+        <span class="c1"># 分词</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">jieba</span><span class="o">.</span><span class="n">lcut</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="c1"># 统计词频</span>
+        <span class="n">word_freq</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+    <span class="c1"># 过滤低频词，构建词汇表</span>
+    <span class="n">vocab</span> <span class="o">=</span> <span class="p">{</span><span class="n">word</span><span class="p">:</span> <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">freq</span><span class="p">)</span> <span class="ow">in</span>
+             <span class="nb">enumerate</span><span class="p">(</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">word_freq</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_freq</span><span class="p">])}</span>
+    <span class="k">return</span> <span class="n">vocab</span>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># 训练语料中的数据</span>
+    <span class="n">content</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;传智教育是一家上市公司，旗下有黑马程序员品牌。我是在黑马这里学习人工智能&quot;</span><span class="p">,</span><span class="s2">&quot;传智教育是一家上市公司，旗下有黑马程序员品牌。我是在黑马这里学习人工智能&quot;</span><span class="p">]</span>
+    <span class="c1"># 构建词表</span>
+    <span class="n">vocab</span> <span class="o">=</span><span class="n">build_vocabulary</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">min_freq</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+</code></pre></div>
+<p>词表的结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="o">{</span><span class="s1">&#39;传智&#39;</span>:<span class="w"> </span><span class="m">0</span>,<span class="w"> </span><span class="s1">&#39;教育&#39;</span>:<span class="w"> </span><span class="m">1</span>,<span class="w"> </span><span class="s1">&#39;是&#39;</span>:<span class="w"> </span><span class="m">2</span>,<span class="w"> </span><span class="s1">&#39;一家&#39;</span>:<span class="w"> </span><span class="m">3</span>,<span class="w"> </span><span class="s1">&#39;上市公司&#39;</span>:<span class="w"> </span><span class="m">4</span>,<span class="w"> </span><span class="s1">&#39;，&#39;</span>:<span class="w"> </span><span class="m">5</span>,<span class="w"> </span><span class="s1">&#39;旗下&#39;</span>:<span class="w"> </span><span class="m">6</span>,<span class="w"> </span><span class="s1">&#39;有&#39;</span>:<span class="w"> </span><span class="m">7</span>,<span class="w"> </span><span class="s1">&#39;黑马&#39;</span>:<span class="w"> </span><span class="m">8</span>,<span class="w"> </span><span class="s1">&#39;程序员&#39;</span>:<span class="w"> </span><span class="m">9</span>,<span class="w"> </span><span class="s1">&#39;品牌&#39;</span>:<span class="w"> </span><span class="m">10</span>,<span class="w"> </span><span class="s1">&#39;。&#39;</span>:<span class="w"> </span><span class="m">11</span>,<span class="w"> </span><span class="s1">&#39;我&#39;</span>:<span class="w"> </span><span class="m">12</span>,<span class="w"> </span><span class="s1">&#39;在&#39;</span>:<span class="w"> </span><span class="m">13</span>,<span class="w"> </span><span class="s1">&#39;这里&#39;</span>:<span class="w"> </span><span class="m">14</span>,<span class="w"> </span><span class="s1">&#39;学习&#39;</span>:<span class="w"> </span><span class="m">15</span>,<span class="w"> </span><span class="s1">&#39;人工智能&#39;</span>:<span class="w"> </span><span class="m">16</span><span class="o">}</span>
+</code></pre></div>
+<h3 id="15">1.5 词向量<a class="headerlink" href="#15" title="Permanent link">&para;</a></h3>
+<p>词向量是将文本中的词语或字符映射到实数向量空间的技术，通过一个向量来表示一个词。从而将人类可读的文本转换为机器可理解的数值形式，为深度学习模型提供输入。</p>
+<h4 id="151-one-hot">1.5.1 one-hot编码<a class="headerlink" href="#151-one-hot" title="Permanent link">&para;</a></h4>
+<p>One-Hot编码是一种将词语表示为二进制向量的方法，其中：</p>
+<ul>
+<li>向量的长度等于词汇表的大小</li>
+<li>每个词对应向量中的一个特定位置</li>
+<li>对于给定的词，其对应位置为1，其他所有位置为0</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># 定义词汇表</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;UNK&gt;&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;教育&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;猫&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">&#39;狗&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;鱼&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="s1">&#39;鸟&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s1">&#39;跑&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="s1">&#39;游泳&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+    <span class="s1">&#39;传智&#39;</span><span class="p">:</span> <span class="mi">8</span>
+<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">one_hot_encoding</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">vocab</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One-Hot编码&quot;&quot;&quot;</span>
+    <span class="n">vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">:</span>
+        <span class="n">vector</span><span class="p">[</span><span class="n">vocab</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">vector</span><span class="p">[</span><span class="n">vocab</span><span class="p">[</span><span class="s1">&#39;&lt;UNK&gt;&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">vector</span>
+
+<span class="c1"># 测试编码</span>
+<span class="n">test_words</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;猫&#39;</span><span class="p">,</span> <span class="s1">&#39;狗&#39;</span><span class="p">,</span> <span class="s1">&#39;鱼&#39;</span><span class="p">,</span> <span class="s1">&#39;传智&#39;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;词汇表:&quot;</span><span class="p">,</span> <span class="n">vocab</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">One-Hot编码结果:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">test_words</span><span class="p">:</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="n">one_hot_encoding</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">vocab</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">word</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">encoding</span><span class="si">}</span><span class="s2"> &quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>one-hot编码的基本特点：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">特性</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>稀疏性</strong></td>
+<td style="text-align: left;">向量中大部分元素为0，只有一个元素为1</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>高维度</strong></td>
+<td style="text-align: left;">向量维度等于词汇表大小，通常很高</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>唯一性</strong></td>
+<td style="text-align: left;">每个词都有唯一的向量表示</td>
+</tr>
+</tbody>
+</table>
+<p><strong>缺点</strong>：高维稀疏向量，计算效率低，无法捕捉词之间的语义相似性。而且在大语料集下，每个向量的长度过大，占据大量内存。</p>
+<h4 id="152">1.5.2 词嵌入<a class="headerlink" href="#152" title="Permanent link">&para;</a></h4>
+<p><code>nn.Embedding</code> 是 PyTorch 中专门用于词嵌入的模块，它将离散的单词索引映射到连续的稠密向量。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="c1"># 词表</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;PAD&gt;&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;UNK&gt;&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;猫&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;狗&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;老虎&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;狮子&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># 动物</span>
+    <span class="s1">&#39;苹果&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;香蕉&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;橙子&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;葡萄&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>  <span class="c1"># 水果</span>
+    <span class="s1">&#39;跑&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;跳&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;走&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;游泳&#39;</span><span class="p">:</span> <span class="mi">13</span>  <span class="c1"># 动作</span>
+<span class="p">}</span>
+<span class="c1"># 词嵌入</span>
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">20</span><span class="p">)</span>
+
+<span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;猫&#39;</span><span class="p">,</span> <span class="s1">&#39;狗&#39;</span><span class="p">,</span> <span class="s1">&#39;老虎&#39;</span><span class="p">,</span> <span class="s1">&#39;狮子&#39;</span><span class="p">,</span> <span class="s1">&#39;苹果&#39;</span><span class="p">,</span> <span class="s1">&#39;香蕉&#39;</span><span class="p">,</span> <span class="s1">&#39;跑&#39;</span><span class="p">,</span> <span class="s1">&#39;跳&#39;</span><span class="p">]</span>
+
+<span class="c1"># 获取词的索引</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">:</span>
+        <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="n">word</span><span class="p">])</span>
+
+<span class="c1"># 获取词向量</span>
+<span class="n">indices_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">indices_tensor</span><span class="p">)</span> <span class="c1"># tensor([ 2,  3,  4,  5,  6,  7, 10, 11])</span>
+<span class="n">word_vectors</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">(</span><span class="n">indices_tensor</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">word_vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (8, 20)</span>
+</code></pre></div>
+<p>词嵌入向量的可视化:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;TKAgg&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.manifold</span> <span class="kn">import</span> <span class="n">TSNE</span>
+<span class="kn">from</span> <span class="nn">pylab</span> <span class="kn">import</span> <span class="n">mpl</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="c1"># 设置显示中文字体，</span>
+<span class="c1"># 设置font.sans-serif 或 font.family 均可</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.sans-serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Arial Unicode MS&quot;</span><span class="p">]</span> <span class="c1">## mac</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.family&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Arial Unicode MS&#39;</span><span class="p">]</span> <span class="c1">## mac</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.sans-serif&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;SimHei&quot;</span><span class="p">]</span> <span class="c1">## win</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">&#39;font.family&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SimHei&#39;</span><span class="p">]</span> <span class="c1">## win</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.unicode_minus&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># 词表</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;&lt;PAD&gt;&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;UNK&gt;&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;猫&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;狗&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;老虎&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;狮子&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>  <span class="c1"># 动物</span>
+    <span class="s1">&#39;苹果&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;香蕉&#39;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;橙子&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;葡萄&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>  <span class="c1"># 水果</span>
+    <span class="s1">&#39;跑&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;跳&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;走&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;游泳&#39;</span><span class="p">:</span> <span class="mi">13</span>  <span class="c1"># 动作</span>
+<span class="p">}</span>
+
+<span class="n">embedding</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">vocab</span><span class="p">),</span> <span class="mi">20</span><span class="p">)</span>
+<span class="c1"># 在实际应用中，这里应该是训练好的嵌入层</span>
+
+<span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;猫&#39;</span><span class="p">,</span> <span class="s1">&#39;狗&#39;</span><span class="p">,</span> <span class="s1">&#39;老虎&#39;</span><span class="p">,</span> <span class="s1">&#39;狮子&#39;</span><span class="p">,</span> <span class="s1">&#39;苹果&#39;</span><span class="p">,</span> <span class="s1">&#39;香蕉&#39;</span><span class="p">,</span> <span class="s1">&#39;跑&#39;</span><span class="p">,</span> <span class="s1">&#39;跳&#39;</span><span class="p">]</span>
+
+<span class="c1"># 获取词的索引</span>
+<span class="c1"># 获取要可视化的词的索引</span>
+<span class="n">indices</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">:</span>
+        <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="n">word</span><span class="p">])</span>
+        <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">word</span><span class="p">)</span>
+
+
+<span class="c1"># 获取词向量</span>
+<span class="n">indices_tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+<span class="n">word_vectors</span> <span class="o">=</span> <span class="n">embedding</span><span class="p">(</span><span class="n">indices_tensor</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+<span class="c1"># 使用t-SNE降维</span>
+<span class="n">tsne</span> <span class="o">=</span> <span class="n">TSNE</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">perplexity</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">vectors_2d</span> <span class="o">=</span> <span class="n">tsne</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">word_vectors</span><span class="p">)</span>
+
+<span class="c1"># 绘图</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">vectors_2d</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">vectors_2d</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="n">vectors_2d</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">vectors_2d</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
+                 <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;offset points&#39;</span><span class="p">,</span>
+                 <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;词向量可视化 (t-SNE)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t-SNE 维度 1&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;t-SNE 维度 2&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<p>结果如下所示：</p>
+<p><img src="assets/image-20251020143903046.png" alt="image-20251020143903046" style="zoom:50%;" /></p>
+<h4 id="153">1.5.3【扩展】大模型中的词向量<a class="headerlink" href="#153" title="Permanent link">&para;</a></h4>
+<p>在大模型中Tokenizer 来完成词嵌入的过程，他的核心目标是：将文本转换为模型可以处理的数据。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span>
+
+
+<span class="k">def</span> <span class="nf">demonstrate_tokenizer</span><span class="p">():</span>
+
+    <span class="c1"># 1. 加载分词器</span>
+    <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">AutoTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s2">&quot;bert-base-chinese&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 2. 准备文本</span>
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;自然语言处理很有趣&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;深度学习改变了AI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;欢迎学习大模型技术&quot;</span>
+    <span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">texts</span><span class="p">:</span>
+        <span class="c1"># 分词</span>
+        <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="c1"># 编码</span>
+        <span class="n">input_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="c1"># 解码</span>
+        <span class="n">decoded_text</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">input_ids</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">原始文本: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;分词结果: </span><span class="si">{</span><span class="n">tokens</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;输入ID: </span><span class="si">{</span><span class="n">input_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;解码文本: </span><span class="si">{</span><span class="n">decoded_text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="n">demonstrate_tokenizer</span><span class="p">()</span>
+</code></pre></div>
+<p>输出结果为：</p>
+<p><img src="assets/image-20251020145045070.png" alt="image-20251020145045070" style="zoom:50%;" /></p>
+<h2 id="2">2. 模型选择<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<p>人工神经网络深度学习的核心模型架构，人工神经网络模仿生物神经网络结构和功能的计算模型</p>
+<h3 id="21">2.1 什么是神经网络<a class="headerlink" href="#21" title="Permanent link">&para;</a></h3>
+<p>人工神经网络（ Artificial Neural Network， 简写为ANN）也简称为神经网络（NN），是一种模仿生物神经网络结构和功能的计算模型。人脑可以看做是一个生物神经网络，由众多的神经元连接而成。各个神经元传递复杂的电信号，树突接收到输入信号，然后对信号进行处理，通过轴突输出信号。下图是生物神经元示意图：</p>
+<p><img src="assets/05.png" /></p>
+<p>当电信号通过树突进入到细胞核时，会逐渐聚集电荷。达到一定的电位后，细胞就会被激活，通过轴突发出电信号。</p>
+<p>那怎么构建人工神经网络中的神经元呢？</p>
+<p><img src="assets/08.png" /></p>
+<p>这个流程就像，来源不同树突(树突都会有不同的权重)的信息, 进行的加权计算, 输入到细胞中做加和，再通过激活函数输出细胞值。</p>
+<p>接下来，我们使用多个神经元来构建神经网络，相邻层之间的神经元相互连接，并给每一个连接分配一个强度，如下图所示：</p>
+<p><img src="assets/07.png" /></p>
+<p>神经网络中信息只向一个方向移动，即从输入节点向前移动，通过隐藏节点，再向输出节点移动。其中的基本部分是:</p>
+<ol>
+<li>输入层: 即输入 x 的那一层</li>
+<li>输出层: 即输出 y 的那一层</li>
+<li>隐藏层: 输入层和输出层之间都是隐藏层</li>
+</ol>
+<p>特点是：</p>
+<p>同一层的神经元之间没有连接。
+第 N 层的每个神经元和第 N-1层 的所有神经元相连（这就是full connected的含义), 第N-1层神经元的输出就是第N层神经元的输入。每个连接都有一个权值。</p>
+<h3 id="22">2.2 激活函数<a class="headerlink" href="#22" title="Permanent link">&para;</a></h3>
+<h4 id="221">2.2.1 激活函数的作用<a class="headerlink" href="#221" title="Permanent link">&para;</a></h4>
+<p>激活函数用于对每层的输出数据进行变换, 进而为整个网络结构结构注入了非线性因素。此时, 神经网络就可以拟合各种曲线。如果不使用激活函数，整个网络虽然看起来复杂，其本质还相当于一种线性模型，如下所示:</p>
+<p><img src="assets/09.png" />
+<img src="assets/10-1761198772749-1.png" /></p>
+<blockquote>
+<ol>
+<li>没有引入非线性因素的网络等价于使用一个线性模型来拟合</li>
+<li>通过给网络输出增加激活函数, 实现引入非线性因素, 使得网络模型可以逼近任意函数, 提升网络对复杂问题的拟合能力.</li>
+</ol>
+</blockquote>
+<p>另外通过图像可视化的形式理解：</p>
+<p><a href='http://playground.tensorflow.org/#activation=tanh&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape=4,2&seed=0.97420&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=classification&initZero=false&hideText=false'>神经网络可视化</a></p>
+<p><img src="assets/11.png" /></p>
+<p>我们发现增加激活函数之后, 神经网络的拟合能力更强。</p>
+<h4 id="222">2.2.2 常见的激活函数<a class="headerlink" href="#222" title="Permanent link">&para;</a></h4>
+<p>激活函数主要用来向神经网络中加入非线性因素，以解决线性模型表达能力不足的问题，它对神经网络有着极其重要的作用。我们的网络参数在更新时，使用的反向传播算法（BP），这就要求我们的激活函数必须可微。</p>
+<h5 id="2221-sigmoid">2.2.2.1 sigmoid 激活函数<a class="headerlink" href="#2221-sigmoid" title="Permanent link">&para;</a></h5>
+<p><img src="assets/21.png" /></p>
+<p>sigmoid 激活函数的函数图像如下:</p>
+<p><img src="assets/25.png" /></p>
+<p>从 sigmoid 函数图像可以得到，sigmoid 函数可以将任意的输入映射到 (0, 1) 之间，当输入的值大致在 &lt;-6 或者 &gt;6 时，意味着输入任何值得到的激活值都是差不多的，这样会丢失部分的信息。比如：输入 100 和输出 10000 经过 sigmoid 的激活值几乎都是等于 1 的，但是输入的数据之间相差 100 倍的信息就丢失了。</p>
+<p>对于 sigmoid 函数而言，输入值在 [-6, 6] 之间输出值才会有明显差异，输入值在 [-3, 3] 之间才会有比较好的效果。</p>
+<p>通过上述导数图像，我们发现导数数值范围是 (0, 0.25)，当输入 &lt;-6 或者 &gt;6 时，sigmoid 激活函数图像的导数接近为 0，此时网络参数将更新极其缓慢，或者无法更新。</p>
+<p>一般来说， sigmoid 网络在 5 层之内就会产生梯度消失现象。而且，该激活函数并不是以 0 为中心的，所以在实践中这种激活函数使用的很少。sigmoid函数一般只用于二分类的输出层。</p>
+<p>在 PyTorch 中使用 sigmoid 函数的示例代码如下:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;TkAgg&#39;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># sigmoid</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="c1"># 实例化</span>
+<span class="n">sigmoid</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># 导数</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h5 id="2222-tanh">2.2.2.2 tanh 激活函数<a class="headerlink" href="#2222-tanh" title="Permanent link">&para;</a></h5>
+<p>Tanh 叫做双曲正切函数，其公式如下：</p>
+<p><img src="assets/23.png" /></p>
+<p>Tanh 的函数图像、导数图像如下：</p>
+<p><img src="assets/24.png" /></p>
+<p>由上面的函数图像可以看到，Tanh 函数将输入映射到 (-1, 1) 之间，图像以 0 为中心，在 0 点对称，当输入 大概&lt;-3 或者 &gt;3 时将被映射为 -1 或者 1。其导数值范围 (0, 1)，当输入的值大概 &lt;-3 或者 &gt; 3 时，其导数近似 0。</p>
+<p>与 Sigmoid 相比，它是以 0 为中心的，使得其收敛速度要比 Sigmoid 快，减少迭代次数。然而，从图中可以看出，Tanh 两侧的导数也为 0，同样会造成梯度消失。</p>
+<p>若使用时可在隐藏层使用tanh函数，在输出层使用sigmoid函数。</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># tanh</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">tanh</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">Tanh</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">tanh</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># 导数</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">tanh</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h5 id="2223-relu">2.2.2.3 ReLU 激活函数<a class="headerlink" href="#2223-relu" title="Permanent link">&para;</a></h5>
+<p>ReLU 激活函数公式如下：</p>
+<p><img src="assets/26.png" /></p>
+<p>函数图像如下:</p>
+<p><img alt="image-20220516160427840" src="assets/image-20220516160427840.png" /></p>
+<p>从上述函数图像可知，ReLU 激活函数将小于 0 的值映射为 0，而大于 0 的值则保持不变，它更加重视正信号，而忽略负信号，这种激活函数运算更为简单，能够提高模型的训练效率。</p>
+<p>从图中可以看到，当x&lt;0时，ReLU导数为0，而当x&gt;0时，则不存在饱和问题。所以，ReLU 能够在x&gt;0时保持梯度不衰减，从而缓解梯度消失问题。然而，随着训练的推进，部分输入会落入小于0区域，导致对应权重无法更新。这种现象被称为“神经元死亡”。</p>
+<p>ReLU是目前最常用的激活函数。与sigmoid相比，RELU的优势是：</p>
+<p>采用sigmoid函数，计算量大（指数运算），反向传播求误差梯度时，求导涉及除法，计算量相对大，而采用Relu激活函数，整个过程的计算量节省很多。
+sigmoid函数反向传播时，很容易就会出现梯度消失的情况，从而无法完成深层网络的训练。
+Relu会使一部分神经元的输出为0，这样就造成了网络的稀疏性，并且减少了参数的相互依存关系，缓解了过拟合问题的发生。</p>
+<p>代码实现如下：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># relu</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">relu</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># 导数</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h5 id="2224-gelu">2.2.2.4 Gelu激活函数<a class="headerlink" href="#2224-gelu" title="Permanent link">&para;</a></h5>
+<p>GELU（Gaussian Error Linear Unit）激活函数，在Transformer模型（如BERT, GPT）中取得了巨大成功，ReLU的一个平滑变体。GELU 已经成为现代深度学习，特别是自然语言处理领域的默认激活函数选择，它在保持ReLU优点的同时，提供了更好的平滑性和性能。</p>
+<p>公式近似如下：</p>
+<p><img alt="image-20251112153235508" src="assets/image-20251112153235508.png" /></p>
+<p>曲线如下所示：</p>
+<p><img alt="image-20251020150146514" src="assets/image-20251020150146514.png" /></p>
+<p>优点</p>
+<ul>
+<li>相比于ReLU，GELU函数在临近原点时梯度不为零，减少了训练过程中梯度消失的问题；</li>
+<li>导函数比较光滑，无间断情况，容易做反向传播；</li>
+<li>RELU计算复杂度较低，同时具有良好的性能，常用于大规模训练的任务，例如BERT、GPT等等。</li>
+</ul>
+<p>代码实现如下：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># gelu</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">gelu</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gelu</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># 导数</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">gelu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">grad</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div>
+<h5 id="2225-softmax">2.2.2.5 SoftMax<a class="headerlink" href="#2225-softmax" title="Permanent link">&para;</a></h5>
+<p>softmax用于多分类过程中，它是二分类函数sigmoid在多分类上的推广，目的是将多分类的结果以概率的形式展现出来。</p>
+<p>计算方法如下图所示：</p>
+<p><img src="assets/29.png" /></p>
+<p><img src="assets/30.png" /></p>
+<p>Softmax 直白来说就是将网络输出的 logits 通过 softmax 函数，就映射成为(0,1)的值，而这些值的累和为1（满足概率的性质），那么我们将它理解成概率，选取概率最大（也就是值对应最大的）节点，作为我们的预测目标类别。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="c1"># logits</span>
+<span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">3.75</span><span class="p">])</span>
+<span class="c1"># softmax</span>
+<span class="n">softmax</span> <span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">softmax</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
+</code></pre></div>
+<p>程序输出结果:</p>
+<div class="highlight"><pre><span></span><code><span class="n">tensor</span><span class="p">([</span><span class="mf">0.0212</span><span class="p">,</span> <span class="mf">0.0177</span><span class="p">,</span> <span class="mf">0.0202</span><span class="p">,</span> <span class="mf">0.0202</span><span class="p">,</span> <span class="mf">0.0638</span><span class="p">,</span> <span class="mf">0.0287</span><span class="p">,</span> <span class="mf">0.0185</span><span class="p">,</span> <span class="mf">0.0522</span><span class="p">,</span> <span class="mf">0.0183</span><span class="p">,</span>
+        <span class="mf">0.7392</span><span class="p">])</span>
+</code></pre></div>
+<h4 id="223">2.2.3 其他激活函数及激活函数的选择方法<a class="headerlink" href="#223" title="Permanent link">&para;</a></h4>
+<p>除了上述的激活函数，还存在很多其他的激活函数，如下图所示:</p>
+<p><img src="assets/31.png" /></p>
+<p>这么多激活函数, 我们应该如何选择呢?</p>
+<p>对于隐藏层:</p>
+<ol>
+<li>
+<p>优先选择RELU激活函数</p>
+</li>
+<li>
+<p>如果ReLu效果不好，那么尝试其他激活，如Leaky ReLu等。</p>
+</li>
+<li>
+<p>如果你使用了Relu， 需要注意一下Dead Relu问题， 避免出现大的梯度从而导致过多的神经元死亡。</p>
+</li>
+<li>
+<p>不要使用sigmoid激活函数，可以尝试使用tanh激活函数</p>
+</li>
+</ol>
+<p>对于输出层</p>
+<ol>
+<li>
+<p>二分类问题选择sigmoid激活函数</p>
+</li>
+<li>
+<p>多分类问题选择softmax激活函数</p>
+</li>
+<li>
+<p>回归问题选择identity激活函数</p>
+</li>
+</ol>
+<h3 id="23">2.3 神经网络搭建和参数计算<a class="headerlink" href="#23" title="Permanent link">&para;</a></h3>
+<h4 id="231">2.3.1  构建简单神经网络<a class="headerlink" href="#231" title="Permanent link">&para;</a></h4>
+<p>接下来我们来构建如下图所示的神经网络模型：</p>
+<p><img src="assets/image-20220313133601678.png" alt="image-20220313133601678" style="zoom:50%;" /></p>
+<p>神经网络时输入层有输入数据决定，在构建神经网络时只需设计隐藏层和输出层即可。</p>
+<p>PyTorch 使用模块作为深度学习模型的构建块，可以快速、直接地构建神经网络，而无需手动编码每个算法的繁琐工作。</p>
+<p>在pytorch中定义深度神经网络其实就是一个层堆叠的过程，继承自nn.Module，实现两个方法：</p>
+<ul>
+<li><code>__init__</code> 方法中定义网络中的层结构，主要是全连接层，并进行初始化</li>
+<li><code>forward</code>方法，在实例化模型的时候，底层会自动调用该函数。该函数中为初始化定义的layer传入数据，并确定数据的流向等。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">torchsummary</span> <span class="kn">import</span> <span class="n">summary</span>
+<span class="c1"># 网络构建</span>
+<span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+                <span class="c1"># 第一个隐藏层</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+                <span class="c1"># 第二个隐藏层</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">3</span> <span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+                <span class="c1"># 输出层</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out</span>  <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relu</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softmax</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+
+        <span class="c1"># 数据经过第一个线性层</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># 数据经过第二个线性层</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear2</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># 数据经过输出层</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># 返回最终的结果</span>
+        <span class="k">return</span> <span class="n">x</span>
+</code></pre></div>
+<p>我们构建好网络结构后，就可以调用构建好的模型，如下所示：</p>
+<div class="highlight"><pre><span></span><code><span class="k">if</span> <span class="vm">__name__</span>  <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># 实例化model对象</span>
+    <span class="n">mymodel</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+
+    <span class="c1"># 随机产生数据</span>
+    <span class="n">mydata</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># 将数据送入网络中，获取输出结果</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">mymodel</span><span class="p">(</span><span class="n">mydata</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;mydata.shape---&gt;&#39;</span><span class="p">,</span> <span class="n">mydata</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;output.shape---&gt;&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="c1"># 模型结构展示</span>
+    <span class="n">summary</span><span class="p">(</span><span class="n">mymodel</span><span class="p">,</span> <span class="n">input_size</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,),</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div>
+<p>输出结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="n">mydata</span><span class="o">.</span><span class="n">shape</span><span class="o">---&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="o">---&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="o">----------------------------------------------------------------</span>
+        <span class="n">Layer</span> <span class="p">(</span><span class="nb">type</span><span class="p">)</span>               <span class="n">Output</span> <span class="n">Shape</span>         <span class="n">Param</span> <span class="c1">#</span>
+<span class="o">================================================================</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">1</span>                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>              <span class="mi">12</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">2</span>                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>               <span class="mi">8</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">3</span>                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>               <span class="mi">6</span>
+<span class="o">================================================================</span>
+<span class="n">Total</span> <span class="n">params</span><span class="p">:</span> <span class="mi">26</span>
+<span class="n">Trainable</span> <span class="n">params</span><span class="p">:</span> <span class="mi">26</span>
+<span class="n">Non</span><span class="o">-</span><span class="n">trainable</span> <span class="n">params</span><span class="p">:</span> <span class="mi">0</span>
+<span class="o">----------------------------------------------------------------</span>
+<span class="n">Input</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Forward</span><span class="o">/</span><span class="n">backward</span> <span class="k">pass</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Params</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Estimated</span> <span class="n">Total</span> <span class="n">Size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="o">----------------------------------------------------------------</span>
+</code></pre></div>
+<h4 id="232">2.3.2 输入数据和输出数据分析<a class="headerlink" href="#232" title="Permanent link">&para;</a></h4>
+<p>神经网络的输入数据是为<code>[batch_size, in_features]</code>的张量经过网络处理后获取了<code>[batch_size, out_features]</code>的输出张量。在上述例子中，batchsize=5, infeatures=3,out_features=2,结果如下所示：</p>
+<div class="highlight"><pre><span></span><code><span class="n">mydata</span><span class="o">.</span><span class="n">shape</span><span class="o">---&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="o">---&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+</code></pre></div>
+<h4 id="233">2.3.3 模型参数分析<a class="headerlink" href="#233" title="Permanent link">&para;</a></h4>
+<ul>
+<li>观察模型的参数</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="o">----------------------------------------------------------------</span>
+        <span class="n">Layer</span> <span class="p">(</span><span class="nb">type</span><span class="p">)</span>               <span class="n">Output</span> <span class="n">Shape</span>         <span class="n">Param</span> <span class="c1">#</span>
+<span class="o">================================================================</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">1</span>                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>              <span class="mi">12</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">2</span>                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>               <span class="mi">8</span>
+            <span class="n">Linear</span><span class="o">-</span><span class="mi">3</span>                     <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>               <span class="mi">6</span>
+<span class="o">================================================================</span>
+<span class="n">Total</span> <span class="n">params</span><span class="p">:</span> <span class="mi">26</span>
+<span class="n">Trainable</span> <span class="n">params</span><span class="p">:</span> <span class="mi">26</span>
+<span class="n">Non</span><span class="o">-</span><span class="n">trainable</span> <span class="n">params</span><span class="p">:</span> <span class="mi">0</span>
+<span class="o">----------------------------------------------------------------</span>
+<span class="n">Input</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Forward</span><span class="o">/</span><span class="n">backward</span> <span class="k">pass</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Params</span> <span class="n">size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="n">Estimated</span> <span class="n">Total</span> <span class="n">Size</span> <span class="p">(</span><span class="n">MB</span><span class="p">):</span> <span class="mf">0.00</span>
+<span class="o">----------------------------------------------------------------</span>
+</code></pre></div>
+<ul>
+<li>模型参数的计算<ul>
+<li>以第一个隐层为例：该隐层有3个神经元，每个神经元的参数为：4个（w1,w2,w3,b1），所以一共用3x4=12个参数。 </li>
+<li><img src="assets/image-20220313141138281.png" alt="image-20220313141138281" style="zoom:40%;" /></li>
+<li>输入数据和网络权重是两个不同的事儿！对于初学者理解这一点十分重要，要分得清。</li>
+</ul>
+</li>
+</ul>
+<h4 id="234-transformer">2.3.4 transformer模型<a class="headerlink" href="#234-transformer" title="Permanent link">&para;</a></h4>
+<p>Transformer 的整体结构是一个编码器-解码器架构：</p>
+<ol>
+<li><strong>编码器</strong>：负责将输入序列（如一个句子）转换为一组富含上下文信息的特征。</li>
+<li><strong>解码器</strong>：根据编码器的输出和之前已生成的输出，自回归地生成目标序列。</li>
+</ol>
+<p><img src="assets/Transformer_full_architecture.png" alt="Transformer_full_architecture" style="zoom:50%;" /></p>
+<h5 id="1_1"><strong>1. 输入</strong><a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h5>
+<p>在输入进入编码器之前，需要先进行以下处理：</p>
+<ul>
+<li><strong>词嵌入</strong>：将输入的每个词（Token）转换成一个向量。</li>
+<li><strong>位置编码</strong>：额外注入位置编码信息到输入嵌入中。位置编码是一个与词嵌入维度相同的向量，它使用正弦和余弦函数来为每个位置生成一个独特的“位置信号”。</li>
+</ul>
+<h5 id="2ae">2.编码器（AE模型）<a class="headerlink" href="#2ae" title="Permanent link">&para;</a></h5>
+<p>编码器由 N 个（原论文中 N=6）完全相同的层堆叠而成。每一层都包含两个核心子层：</p>
+<ul>
+<li><strong>多头自注意力层</strong>：让输入序列中的每个词都能与其他所有词进行交互，捕捉远距离依赖关系。</li>
+<li><strong>前馈神经网络层</strong>：一个简单的全连接网络，对每个位置的表示进行独立变换（位置间参数共享）。</li>
+</ul>
+<p>每个子层周围都有一个残差连接，后接层归一化。也就是说，每个子层的输出是 <code>LayerNorm(x + Sublayer(x))</code>。这使得深层网络更容易训练。</p>
+<h5 id="3-ar">3. 解码器（AR模型）<a class="headerlink" href="#3-ar" title="Permanent link">&para;</a></h5>
+<p>解码器也由 N 个（原论文中 N=6）完全相同的层堆叠而成。每一层包含三个核心子层：</p>
+<ul>
+<li><strong>掩码多头自注意力层</strong>： 这是一个“掩码”的自注意力层。在训练时，为了确保模型在预测第 t 个位置时只能看到 t 之前的位置（而不能看到未来的信息），会使用一个掩码矩阵将未来位置的信息遮盖掉。</li>
+<li><strong>多头编码器-解码器注意力层</strong>： 这是连接编码器和解码器的桥梁。它的 Query 向量来自解码器上一层的输出，而 Key 和 Value 向量来自**编码器的最终输出**。这使得解码器在生成每一个词时，都能有选择地关注输入序列中最相关的部分。</li>
+<li><strong>前馈神经网络层</strong>： 与编码器中的相同。</li>
+</ul>
+<p>同样，每个子层周围也都有残差连接和层归一化。</p>
+<h5 id="4"><strong>4. 输出</strong><a class="headerlink" href="#4" title="Permanent link">&para;</a></h5>
+<p>解码器的输出会通过一个线性层和一个 Softmax 层，转换为下一个词的概率分布。</p>
+<h5 id="5-bert"><strong>5. Bert中模型架构</strong><a class="headerlink" href="#5-bert" title="Permanent link">&para;</a></h5>
+<p>获取方式：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span><span class="n">AutoModel</span>
+<span class="c1"># 获取模型</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">AutoModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="s1">&#39;bert-base-chinese&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</code></pre></div>
+<p>结果为：</p>
+<div class="highlight"><pre><span></span><code>BertModel<span class="o">(</span>
+<span class="w">  </span><span class="o">(</span>embeddings<span class="o">)</span>:<span class="w"> </span>BertEmbeddings<span class="o">(</span>
+<span class="w">    </span><span class="o">(</span>word_embeddings<span class="o">)</span>:<span class="w"> </span>Embedding<span class="o">(</span><span class="m">21128</span>,<span class="w"> </span><span class="m">768</span>,<span class="w"> </span><span class="nv">padding_idx</span><span class="o">=</span><span class="m">0</span><span class="o">)</span>
+<span class="w">    </span><span class="o">(</span>position_embeddings<span class="o">)</span>:<span class="w"> </span>Embedding<span class="o">(</span><span class="m">512</span>,<span class="w"> </span><span class="m">768</span><span class="o">)</span>
+<span class="w">    </span><span class="o">(</span>token_type_embeddings<span class="o">)</span>:<span class="w"> </span>Embedding<span class="o">(</span><span class="m">2</span>,<span class="w"> </span><span class="m">768</span><span class="o">)</span>
+<span class="w">    </span><span class="o">(</span>LayerNorm<span class="o">)</span>:<span class="w"> </span>LayerNorm<span class="o">((</span><span class="m">768</span>,<span class="o">)</span>,<span class="w"> </span><span class="nv">eps</span><span class="o">=</span>1e-12,<span class="w"> </span><span class="nv">elementwise_affine</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">    </span><span class="o">(</span>dropout<span class="o">)</span>:<span class="w"> </span>Dropout<span class="o">(</span><span class="nv">p</span><span class="o">=</span><span class="m">0</span>.1,<span class="w"> </span><span class="nv">inplace</span><span class="o">=</span>False<span class="o">)</span>
+<span class="w">  </span><span class="o">)</span>
+<span class="w">  </span><span class="o">(</span>encoder<span class="o">)</span>:<span class="w"> </span>BertEncoder<span class="o">(</span>
+<span class="w">    </span><span class="o">(</span>layer<span class="o">)</span>:<span class="w"> </span>ModuleList<span class="o">(</span>
+<span class="w">      </span><span class="o">(</span><span class="m">0</span>-11<span class="o">)</span>:<span class="w"> </span><span class="m">12</span><span class="w"> </span>x<span class="w"> </span>BertLayer<span class="o">(</span>
+<span class="w">        </span><span class="o">(</span>attention<span class="o">)</span>:<span class="w"> </span>BertAttention<span class="o">(</span>
+<span class="w">          </span><span class="o">(</span>self<span class="o">)</span>:<span class="w"> </span>BertSdpaSelfAttention<span class="o">(</span>
+<span class="w">            </span><span class="o">(</span>query<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">            </span><span class="o">(</span>key<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">            </span><span class="o">(</span>value<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">            </span><span class="o">(</span>dropout<span class="o">)</span>:<span class="w"> </span>Dropout<span class="o">(</span><span class="nv">p</span><span class="o">=</span><span class="m">0</span>.1,<span class="w"> </span><span class="nv">inplace</span><span class="o">=</span>False<span class="o">)</span>
+<span class="w">          </span><span class="o">)</span>
+<span class="w">          </span><span class="o">(</span>output<span class="o">)</span>:<span class="w"> </span>BertSelfOutput<span class="o">(</span>
+<span class="w">            </span><span class="o">(</span>dense<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">            </span><span class="o">(</span>LayerNorm<span class="o">)</span>:<span class="w"> </span>LayerNorm<span class="o">((</span><span class="m">768</span>,<span class="o">)</span>,<span class="w"> </span><span class="nv">eps</span><span class="o">=</span>1e-12,<span class="w"> </span><span class="nv">elementwise_affine</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">            </span><span class="o">(</span>dropout<span class="o">)</span>:<span class="w"> </span>Dropout<span class="o">(</span><span class="nv">p</span><span class="o">=</span><span class="m">0</span>.1,<span class="w"> </span><span class="nv">inplace</span><span class="o">=</span>False<span class="o">)</span>
+<span class="w">          </span><span class="o">)</span>
+<span class="w">        </span><span class="o">)</span>
+<span class="w">        </span><span class="o">(</span>intermediate<span class="o">)</span>:<span class="w"> </span>BertIntermediate<span class="o">(</span>
+<span class="w">          </span><span class="o">(</span>dense<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">3072</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">          </span><span class="o">(</span>intermediate_act_fn<span class="o">)</span>:<span class="w"> </span>GELUActivation<span class="o">()</span>
+<span class="w">        </span><span class="o">)</span>
+<span class="w">        </span><span class="o">(</span>output<span class="o">)</span>:<span class="w"> </span>BertOutput<span class="o">(</span>
+<span class="w">          </span><span class="o">(</span>dense<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">3072</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">          </span><span class="o">(</span>LayerNorm<span class="o">)</span>:<span class="w"> </span>LayerNorm<span class="o">((</span><span class="m">768</span>,<span class="o">)</span>,<span class="w"> </span><span class="nv">eps</span><span class="o">=</span>1e-12,<span class="w"> </span><span class="nv">elementwise_affine</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">          </span><span class="o">(</span>dropout<span class="o">)</span>:<span class="w"> </span>Dropout<span class="o">(</span><span class="nv">p</span><span class="o">=</span><span class="m">0</span>.1,<span class="w"> </span><span class="nv">inplace</span><span class="o">=</span>False<span class="o">)</span>
+<span class="w">        </span><span class="o">)</span>
+<span class="w">      </span><span class="o">)</span>
+<span class="w">    </span><span class="o">)</span>
+<span class="w">  </span><span class="o">)</span>
+<span class="w">  </span><span class="o">(</span>pooler<span class="o">)</span>:<span class="w"> </span>BertPooler<span class="o">(</span>
+<span class="w">    </span><span class="o">(</span>dense<span class="o">)</span>:<span class="w"> </span>Linear<span class="o">(</span><span class="nv">in_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">out_features</span><span class="o">=</span><span class="m">768</span>,<span class="w"> </span><span class="nv">bias</span><span class="o">=</span>True<span class="o">)</span>
+<span class="w">    </span><span class="o">(</span>activation<span class="o">)</span>:<span class="w"> </span>Tanh<span class="o">()</span>
+<span class="w">  </span><span class="o">)</span>
+<span class="o">)</span>
+</code></pre></div>
+<h2 id="3">3. 模型训练<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p>模型从数据中学习规律的过程。</p>
+<h3 id="31">3.1 损失函数<a class="headerlink" href="#31" title="Permanent link">&para;</a></h3>
+<p>在深度学习中, 损失函数是用来衡量模型参数的质量的函数, 衡量的方式是比较网络输出和真实输出的差异:</p>
+<p><img alt="image-20200730153842351" src="assets/03-1.png" /></p>
+<p>损失函数在不同的文献中名称是不一样的，主要有以下几种命名方式：</p>
+<p><img src="assets/03-2.png" alt="image-20200730154850183" style="zoom:50%;" /></p>
+<p>在深度学习的分类任务中使用最多的是交叉熵损失函数，所以在这里我们着重介绍这种损失函数。</p>
+<h4 id="311">3.1.1 交叉熵损失<a class="headerlink" href="#311" title="Permanent link">&para;</a></h4>
+<p>在多分类任务通常使用softmax将logits转换为概率的形式，所以多分类的交叉熵损失也叫做softmax损失，它的计算方法是：</p>
+<p><img src="assets/03-3.png" alt="image-20200730161303768" style="zoom:50%;" /></p>
+<p>其中，y是样本x属于某一个类别的真实概率，而f(x)是样本属于某一类别的预测分数，S是softmax函数，L用来衡量p,q之间差异性的损失结果。</p>
+<p>例子：</p>
+<p><img src="assets/03-4.png" alt="image-20200730160805389" style="zoom: 67%;" /></p>
+<p>上图中的交叉熵损失为：</p>
+<p><img alt="image-20200730161024749" src="assets/03-5.png" /></p>
+<p>从概率角度理解，我们的目的是最小化正确类别所对应的预测概率的对数的负值，如下图所示：</p>
+<p><img src="assets/03-6.png" alt="image-20200730161746110" style="zoom:67%;" /></p>
+<p>在pytorch中使用nn.CrossEntropyLoss()实现，如下所示：</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># 分类损失函数：交叉熵损失使用nn.CrossEntropyLoss()实现。nn.CrossEntropyLoss()=softmax + 损失计算</span>
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c1"># 设置真实值: 可以是热编码后的结果也可以不进行热编码</span>
+    <span class="c1"># y_true = torch.tensor([[0, 1, 0], [0, 0, 1]], dtype=torch.float32)</span>
+    <span class="c1"># 注意的类型必须是64位整型数据</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="c1"># 实例化交叉熵损失</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+    <span class="c1"># 计算损失结果</span>
+    <span class="n">my_loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_true</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loss:&#39;</span><span class="p">,</span> <span class="n">my_loss</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+</code></pre></div>
+<p>结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="n">loss</span><span class="p">:</span> <span class="mf">1.1200755</span>
+</code></pre></div>
+<h4 id="312">3.1.2 二分类交叉熵<a class="headerlink" href="#312" title="Permanent link">&para;</a></h4>
+<p>在处理二分类任务时，我们不在使用softmax激活函数，而是使用sigmoid激活函数，那损失函数也相应的进行调整，使用二分类的交叉熵损失函数：</p>
+<p><img alt="image-20200730162332710" src="assets/03-7.png" /></p>
+<p>其中，y是样本x属于某一个类别的真实概率，而y^是样本属于某一类别的预测概率，L用来衡量真实值与预测值之间差异性的损失结果。</p>
+<p>在pytorch中实现时使用nn.BCELoss() ，如下所示:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+    <span class="c1"># 1 设置真实值和预测值</span>
+    <span class="c1"># 预测值是sigmoid输出的结果</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.6901</span><span class="p">,</span> <span class="mf">0.5459</span><span class="p">,</span> <span class="mf">0.2469</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y_true</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="c1"># 2 实例化二分类交叉熵损失</span>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">BCELoss</span><span class="p">()</span>
+    <span class="c1"># 3 计算损失</span>
+    <span class="n">my_loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">y_true</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;loss：&#39;</span><span class="p">,</span> <span class="n">my_loss</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test2</span><span class="p">()</span>
+</code></pre></div>
+<p>结果为：</p>
+<div class="highlight"><pre><span></span><code><span class="n">loss</span><span class="err">：</span> <span class="mf">0.6867941</span>
+</code></pre></div>
+<h3 id="32">3.2 优化器<a class="headerlink" href="#32" title="Permanent link">&para;</a></h3>
+<p>多层神经网络的拟合能力比单层网络强得多。想要训练多层网络，需要更强大的学习算法。误差反向传播算法（Back Propagation）是其中最杰出的代表，它是目前最成功的神经网络学习算法。现实任务使用神经网络时，都是在使用 BP 算法进行训练的。</p>
+<h4 id="321">3.2.1 梯度下降算法<a class="headerlink" href="#321" title="Permanent link">&para;</a></h4>
+<p>梯度下降法简单来说就是一种寻找使损失函数最小化的方法。从数学上的角度来看，梯度的方向是函数增长速度最快的方向，那么梯度的反方向就是函数减少最快的方向，所以有：</p>
+<p><img src="assets/12.png" /></p>
+<p>其中，η是学习率，如果学习率太小，那么每次训练之后得到的效果都太小，增大训练的时间成本。如果，学习率太大，那就有可能直接跳过最优解，进入无限的训练中。解决的方法就是，学习率也需要随着训练的进行而变化。</p>
+<p><img src="assets/04-05.png" /></p>
+<p>在上图中我们展示了一维和多维的损失函数，损失函数呈碗状。在训练过程中损失函数对权重的偏导数就是损失函数在该位置点的梯度。我们可以看到，沿着负梯度方向移动，就可以到达损失函数底部，从而使损失函数最小化。这种利用损失函数的梯度迭代地寻找局部最小值的过程就是梯度下降的过程。</p>
+<h4 id="322-bp">3.2.2 反向传播(BP算法)<a class="headerlink" href="#322-bp" title="Permanent link">&para;</a></h4>
+<p>利用反向传播算法对神经网络进行训练。该方法与梯度下降算法相结合，对网络中所有权重计算损失函数的梯度，并利用梯度值来更新权值以最小化损失函数。</p>
+<p>前向传播指的是数据输入的神经网络中，逐层向前传输，一直到运算到输出层为止。</p>
+<p><img src="assets/14.png" /></p>
+<p>在网络的训练过程中经过前向传播后得到的最终结果跟训练样本的真实值总是存在一定误差，这个误差便是损失函数。想要减小这个误差，就用损失函数，从后往前，依次求各个参数的偏导，这就是反向传播（Back Propagation）。</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c1"># 1 初始化权重参数</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">((</span><span class="n">w</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># 2 实例化优化方法</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">([</span><span class="n">w</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+    <span class="c1"># 3 第1次更新 计算梯度，并对参数进行更新</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;第1次: 梯度w.grad: </span><span class="si">%f</span><span class="s1">, 更新后的权重:</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">w</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+    <span class="c1"># 4 第2次更新 计算梯度，并对参数进行更新</span>
+    <span class="c1"># 使用更新后的参数机选输出结果</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">((</span><span class="n">w</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;第2次: 梯度w.grad: </span><span class="si">%f</span><span class="s1">, 更新后的权重:</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">w</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+</code></pre></div>
+<p>输出结果为：</p>
+<div class="highlight"><pre><span></span><code>第1次:<span class="w"> </span>梯度w.grad:<span class="w"> </span><span class="m">1</span>.000000,<span class="w"> </span>更新后的权重:0.990000
+第2次:<span class="w"> </span>梯度w.grad:<span class="w"> </span><span class="m">0</span>.990000,<span class="w"> </span>更新后的权重:0.980100
+</code></pre></div>
+<h4 id="323">3.2.3 梯度下降的优化方法<a class="headerlink" href="#323" title="Permanent link">&para;</a></h4>
+<p>梯度下降优化算法中，可能会碰到以下情况：</p>
+<ul>
+<li>碰到平缓区域，梯度值较小，参数优化变慢</li>
+<li>碰到 “鞍点” ，梯度为 0，参数无法优化</li>
+<li>碰到局部最小值</li>
+</ul>
+<p><img src="assets/50.png" /></p>
+<p>对于这些问题, 出现了一些对梯度下降算法的优化方法，例如：Momentum、AdaGrad、RMSprop、Adam 等.</p>
+<h5 id="3231">3.2.3.1.指数移动加权平均<a class="headerlink" href="#3231" title="Permanent link">&para;</a></h5>
+<p>我们最常见的算数平均指的是将所有数加起来除以数的个数，每个数的权重是相同的。加权平均指的是给每个数赋予不同的权重求得平均数。移动平均数，指的是计算最近邻的 N 个数来获得平均数。</p>
+<p>指数移动加权平均则是参考各数值，并且各数值的权重都不同，距离越远的数字对平均数计算的贡献就越小（权重较小），距离越近则对平均数的计算贡献就越大（权重越大）。</p>
+<p>比如：明天气温怎么样，和今天气温有很大关系，而和一个月前的气温关系就小一些。</p>
+<p>计算公式可以用下面的式子来表示：</p>
+<p><img src="assets/37.png" /></p>
+<ol>
+<li>St 表示指数加权平均值;</li>
+<li>Yt 表示 t 时刻的值;</li>
+<li>β 调节权重系数，该值越大平均数越平缓。</li>
+</ol>
+<p>我们接下来通过一段代码来看下结果，我们随机产生进 30 天的气温数据，来看下使用指数加权平均后的结果</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># 产生的数据</span>
+<span class="n">ELEMENT_NUMBER</span> <span class="o">=</span> <span class="mi">30</span>
+
+<span class="c1"># 指数加权平均温度</span>
+<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+    <span class="c1"># 固定随机数种子</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># 产生30天的随机温度</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="n">ELEMENT_NUMBER</span><span class="p">,</span> <span class="p">])</span> <span class="o">*</span> <span class="mi">10</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
+    <span class="n">days</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ELEMENT_NUMBER</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># 绘制原始数据温度曲线图和散点图</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="c1"># 用来存储指数移动加权平均后的结果</span>
+    <span class="n">exp_weight_avg</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># 遍历每一个温度，下标从1开始</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">temp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># 第一个元素的的 EWA 值等于自身</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">exp_weight_avg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># 第二个元素的 EWA 值等于上一个 EWA 乘以 β + 当前气氛乘以 (1-β)</span>
+        <span class="n">new_temp</span> <span class="o">=</span> <span class="n">exp_weight_avg</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="n">temp</span>
+        <span class="n">exp_weight_avg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_temp</span><span class="p">)</span>
+
+    <span class="c1"># 绘制指数加权平均后的结果</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">exp_weight_avg</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">days</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">test</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
+</code></pre></div>
+<p>程序结果如下:</p>
+<p><img src="assets/38.png" style="zoom:50%;" /></p>
+<p><img src="assets/39.png" style="zoom:50%;" /></p>
+<p><img src="assets/40.png" style="zoom:50%;" /></p>
+<p>从程序运行结果可以看到：</p>
+<p>指数加权移动平均绘制出的气氛变化曲线更加平缓;β 的值越大，则绘制出的折线越加平缓，波动越小。</p>
+<h5 id="3232-adam">3.2.3.2. Adam<a class="headerlink" href="#3232-adam" title="Permanent link">&para;</a></h5>
+<p>Adam 使用：移动加权平均的梯度和移动加权平均的学习率。
+1.修正梯度: 使⽤梯度 的 指数加权平均
+2.修正学习率: 使⽤梯度平⽅ 的 指数加权平均</p>
+<p><strong>修正梯度的方法是</strong> ：</p>
+<p>通过指数加权平均法，累计历史梯度值，进行参数更新，越近的梯度值对当前参数更新的重要性越大。</p>
+<p>梯度计算公式：Dt = β * St-1 + (1- β) * Dt</p>
+<ol>
+<li>St-1 表示历史梯度移动加权平均值</li>
+<li>wt 表示当前时刻的梯度值</li>
+<li>β 为权重系数</li>
+</ol>
+<p>举个例子，假设：权重 β 为 0.9，例如：</p>
+<p>第一次梯度值：s1 = d1 = w1
+第二次梯度值：s2 = 0.9 * s1 + d2 * 0.1
+第三次梯度值：s3 = 0.9 * s2 + d3 * 0.1
+第四次梯度值：s4 = 0.9 * s3 + d4 * 0.1</p>
+<ol>
+<li>w 表示初始梯度</li>
+<li>d 表示当前轮数计算出的梯度值</li>
+<li>s 表示历史梯度值</li>
+</ol>
+<p>梯度下降公式中梯度的计算，就不再是当前时刻 t 的梯度值，而是历史梯度值的指数移动加权平均值。公式修改为：</p>
+<p><img src="assets/41.png" /></p>
+<p><strong>修正学习率的方法是</strong> ：</p>
+<p>使用指数移动加权平均梯度替换历史梯度的平方和。其计算过程如下：</p>
+<ol>
+<li>初始化学习率 α、初始化参数 θ、小常数 σ = 1e-6</li>
+<li>初始化参数 θ</li>
+<li>初始化梯度累计变量 s</li>
+<li>从训练集中采样 m 个样本的小批量，计算梯度 g</li>
+<li>使用指数移动平均累积历史梯度，公式如下：</li>
+</ol>
+<p><img src="assets/45.png" /></p>
+<p>学习率 α 的计算公式如下：</p>
+<p><img src="assets/46.png" /></p>
+<p>参数更新公式如下：</p>
+<p><img src="assets/47.png" /></p>
+<p>在pytroch中，Adam梯度优化法编程实践如下：</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c1"># 1 初始化权重参数</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">((</span><span class="n">w</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># 2 实例化优化方法：Adam算法，其中betas是指数加权的系数</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">([</span><span class="n">w</span><span class="p">],</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span><span class="n">betas</span><span class="o">=</span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span><span class="mf">0.99</span><span class="p">])</span>
+
+    <span class="c1"># 3 第1次更新 计算梯度，并对参数进行更新</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;第1次: 梯度w.grad: </span><span class="si">%f</span><span class="s1">, 更新后的权重:</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">w</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+    <span class="c1"># 4 第2次更新 计算梯度，并对参数进行更新</span>
+    <span class="c1"># 使用更新后的参数机选输出结果</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">((</span><span class="n">w</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+    <span class="n">y</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+    <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;第2次: 梯度w.grad: </span><span class="si">%f</span><span class="s1">, 更新后的权重:</span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">grad</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="n">w</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()))</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+</code></pre></div>
+<p>结果显示：</p>
+<div class="highlight"><pre><span></span><code><span class="n">第1次</span><span class="p">:</span> <span class="n">梯度w</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span> <span class="mf">1.000000</span><span class="p">,</span> <span class="n">更新后的权重</span><span class="p">:</span><span class="mf">0.990000</span>
+<span class="n">第2次</span><span class="p">:</span> <span class="n">梯度w</span><span class="o">.</span><span class="n">grad</span><span class="p">:</span> <span class="mf">0.990000</span><span class="p">,</span> <span class="n">更新后的权重</span><span class="p">:</span><span class="mf">0.980003</span>
+</code></pre></div>
+<p>在进行模型训练时，有三个基础的概念，我们要了解下：</p>
+<ol>
+<li>Epoch: 使用全部数据对模型进行以此完整训练</li>
+<li>Batch: 使用训练集中的小部分样本对模型权重进行以此反向传播的参数更新</li>
+<li>Iteration: 使用一个 Batch 数据对模型进行一次参数更新的过程</li>
+</ol>
+<p>实际上，梯度下降的几种方式的根本区别就在于 Batch Size不同,，如下表所示：</p>
+<p><img src="assets/13.png" /></p>
+<p>注：上表中 Mini-Batch 的 Batch 个数为 N / B + 1 是针对未整除的情况。整除则是 N / B。</p>
+<p>假设数据集有 50000 个训练样本，现在选择 Batch Size = 256 对模型进行训练。</p>
+<p>每个 Epoch 要训练的图片数量：50000
+训练集具有的 Batch 个数：50000/256+1=196
+每个 Epoch 具有的 Iteration 个数：196
+10个 Epoch 具有的 Iteration 个数：1960</p>
+<h3 id="33">3.3 评估方法<a class="headerlink" href="#33" title="Permanent link">&para;</a></h3>
+<p>在分类任务中，常用的评估指标包括：</p>
+<p><strong>1. 准确率（Accuracy）</strong>：</p>
+<p>模型预测正确的样本数占总样本数的比例。</p>
+<p>适用于类别分布平衡的情况。在类别不平衡时，准确率可能无法真实反映模型性能。</p>
+<p><strong>2. 精确率（Precision）</strong>：</p>
+<p>正确预测为正类的样本数占所有预测为正类样本数的比例。</p>
+<p>需要关注预测结果中正类的准确性，如垃圾邮件识别中，减少将正常邮件误判为垃圾邮件的情况。</p>
+<p><strong>3. 召回率（Recall）</strong>：</p>
+<p>正确预测为正类的样本数占所有实际为正类样本数的比例。</p>
+<p>需要尽可能多地找出正类样本，如疾病诊断中，确保尽可能少地漏诊患者。</p>
+<p><strong>4. F1分数（F1 Score）</strong>：</p>
+<p>精确率和召回率的调和平均数，综合考虑了精确率和召回率的表现。</p>
+<p><img alt="image-20251117122516448" src="assets/image-20251117122516448.png" /></p>
+<p>在需要平衡精确率和召回率的情况下使用，如信息检索、文本分类等。</p>
+<h3 id="34-pytorch">3.4 pytorch中模型训练<a class="headerlink" href="#34-pytorch" title="Permanent link">&para;</a></h3>
+<p>PyTorch将模块（modules）作为深度学习模型的构建块，这使得神经网络的构建快速且直接，无需手动编码每个算法的繁琐工作。</p>
+<p>在PyTorch中用于构建和优化深度学习模型的模块主要有：</p>
+<ol>
+<li>
+<p>数据处理：处理训练深度学习模型所需的大型数据集可能非常复杂，并且计算量巨大。PyTorch 提供了torch.utils.data.Dataset存储数据样本及其对应的标签和torch.utils.data.Dataloader包装了一个可迭代对象（可操作的对象），用于数据集，以便轻松访问样本</p>
+</li>
+<li>
+<p>nn模块被用作神经网络的层。torch.nn包包含大量执行常见操作的模块库。例如，torch.nn.Linear(n,m)调用一个具有n个输入和m个输出的线性回归算法（其初始输入和参数在后续代码行中确定）。</p>
+</li>
+<li>
+<p>autograd模块提供了一种简单的方法来自动计算梯度，用于通过梯度下降优化模型参数，适用于神经网络中运行的任何函数。在任何张量后附加requires_grad=True，即向autograd发出信号，表明应对该张量上的所有操作进行跟踪，从而实现自动微分。</p>
+</li>
+<li>
+<p>Optim模块将这些梯度应用于优化算法。Torch.optim为各种优化方法（如随机梯度下降（SGD）或（adam））提供模块，以满足特定的优化需求。</p>
+</li>
+</ol>
+<h4 id="341">3.4.1 数据处理<a class="headerlink" href="#341" title="Permanent link">&para;</a></h4>
+<p>在训练模型之前，我们需要将数据组织成批次（batches），以便高效地进行训练。
+使用 <code>DataLoader</code> 可以实现：</p>
+<ul>
+<li>自动分批</li>
+<li>数据打乱（shuffle）</li>
+<li>并行加载数据</li>
+</ul>
+<h4 id="342">3.4.2 模型构建<a class="headerlink" href="#342" title="Permanent link">&para;</a></h4>
+<p>构建PyTorch模型最常用、最灵活的方式。创建一个类，并定义两个核心方法：<code>__init__</code> 和 <code>forward</code>。</p>
+<ul>
+<li><strong><code>__init__</code> 方法</strong>：用于**定义**模型中所有可学习的参数和层（如 <code>nn.Linear</code>, <code>nn.Conv2d</code>）。</li>
+<li><strong><code>forward</code> 方法</strong>：用于**定义**数据如何通过这些层进行前向传播。这是模型的核心逻辑。</li>
+</ul>
+<h4 id="343-optimizer">3.4.3 优化器（Optimizer）<a class="headerlink" href="#343-optimizer" title="Permanent link">&para;</a></h4>
+<p>负责根据梯度更新模型参数。
+常见优化器：</p>
+<ul>
+<li><code>SGD</code></li>
+<li><code>Adam</code></li>
+</ul>
+<h4 id="344-loss-function">3.4.4 损失函数（Loss Function）<a class="headerlink" href="#344-loss-function" title="Permanent link">&para;</a></h4>
+<p>用于衡量模型预测与真实标签之间的差距。
+常见损失函数：<code>CrossEntropyLoss</code></p>
+<h4 id="345-epoch-batch">3.4.5 训练循环（Epoch 和 Batch）<a class="headerlink" href="#345-epoch-batch" title="Permanent link">&para;</a></h4>
+<p>一个 <strong>Epoch</strong> 表示模型遍历整个训练集一次。
+每个 Epoch 中包含多个 <strong>Batch</strong>，即每次训练使用一小批数据。</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_loader</span><span class="p">):</span>
+        <span class="c1"># 训练步骤...</span>
+</code></pre></div>
+<h4 id="346">3.4.6 训练步骤<a class="headerlink" href="#346" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>前向传播</strong>（<code>model(input)</code>）
+   将输入数据传入模型，得到预测结果。</li>
+<li><strong>计算损失</strong>（<code>loss = loss_fn(output, target)</code>）
+   比较预测结果与真实标签，计算损失值。</li>
+<li><strong>梯度清零</strong>（<code>zero_grad</code>）
+   清除上一轮梯度，避免累积。</li>
+<li><strong>反向传播</strong>（<code>loss.backward()</code>）
+   自动计算梯度。</li>
+<li><strong>更新参数</strong>（<code>optimizer.step()</code>）
+   根据梯度调整模型参数。</li>
+</ul>
+<h4 id="347">3.4.7 模型验证<a class="headerlink" href="#347" title="Permanent link">&para;</a></h4>
+<p>在每个 Epoch 结束后，使用验证集评估模型性能：</p>
+<ul>
+<li>不进行梯度计算（<code>with torch.no_grad()</code>）</li>
+<li>计算验证集上的损失或准确率</li>
+</ul>
+<h4 id="348">3.4.8 保存模型<a class="headerlink" href="#348" title="Permanent link">&para;</a></h4>
+<p>训练完成后，保存模型参数以备后续使用：</p>
+<div class="highlight"><pre><span></span><code>torch.save(model.state_dict(), &#39;model.pth&#39;)
+</code></pre></div>
+<p>整体伪代码如下所示：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span><span class="p">,</span> <span class="n">optim</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="c1"># 数据</span>
+<span class="c1"># 包装特征和标签</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">()</span>
+<span class="c1"># batch</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># 模型</span>
+<span class="k">class</span> <span class="nc">model</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">()</span>
+
+<span class="c1"># 优化器</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">betas</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">))</span>
+
+<span class="c1"># 损失实例化</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+<span class="c1"># 遍历epoch</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="c1"># 遍历batch</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+        <span class="c1"># 模型预测</span>
+        <span class="n">y_pre</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># 计算损失</span>
+        <span class="n">loss_value</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">y_pre</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="c1"># 反向传播</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">loss_value</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+    <span class="c1"># 模型验证</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="c1"># 验证集数据</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="c1"># 评估方式</span>
+        <span class="c1"># 准确率、损失、精确率、召回率、F1</span>
+
+    <span class="c1"># 模型保存</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="s1">&#39;model.pth&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="4_1">4.拟合<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h2>
+<p>在设计机器学习算法时不仅要求在训练集上误差小，而且希望在新样本上的泛化能力强。</p>
+<p><img alt="05-01" src="assets/05-01.png" /></p>
+<p>在机器学习中，<strong>模型拟合</strong> 是指模型从训练数据中学习规律的过程。根据学习效果，可以分为三种状态：</p>
+<ul>
+<li><strong>欠拟合</strong> - 模型学习不足</li>
+<li><strong>正好拟合</strong> - 模型学习恰到好处</li>
+<li><strong>过拟合</strong> - 模型学习过度</li>
+</ul>
+<h3 id="41">4.1 欠拟合<a class="headerlink" href="#41" title="Permanent link">&para;</a></h3>
+<p>模型无法捕捉训练数据中的基本模式和规律。</p>
+<p><strong>表现特征：</strong></p>
+<ul>
+<li>训练集上表现差（高训练误差）</li>
+<li>验证集上表现同样差（高验证误差）</li>
+<li>模型过于简单，无法理解数据复杂性</li>
+</ul>
+<p><strong>解决方法</strong></p>
+<ul>
+<li><strong>增加模型复杂度</strong>： 添加更多层或增加每层的神经元数量</li>
+<li><strong>延长训练时间</strong> ：增加epoch数量</li>
+</ul>
+<h3 id="42">4.2 正好拟合<a class="headerlink" href="#42" title="Permanent link">&para;</a></h3>
+<p>模型很好地学习了数据的真实规律，具有良好的泛化能力。</p>
+<p><strong>表现特征：</strong></p>
+<ul>
+<li>训练集上表现良好（低训练误差）</li>
+<li>验证集上表现同样良好（低验证误差）</li>
+<li>训练误差与验证误差都很低且接近</li>
+</ul>
+<h3 id="43">4.3 过拟合<a class="headerlink" href="#43" title="Permanent link">&para;</a></h3>
+<p>模型不仅学习了数据的真实规律，还学习了噪声和随机波动。</p>
+<p><strong>表现特征：</strong></p>
+<ul>
+<li>训练集上表现极好（极低训练误差）</li>
+<li>验证集上表现差（高验证误差）</li>
+<li>训练误差与验证误差差距很大</li>
+</ul>
+<p>解决方法：</p>
+<h4 id="431-dropout">4.3.1. Dropout正则化<a class="headerlink" href="#431-dropout" title="Permanent link">&para;</a></h4>
+<p>在训练深层练神经网络时，由于模型参数较多，在数据量不足的情况下，很容易过拟合。Dropout，中文是随机失活，是一个简单又机器有效的正则化方法。</p>
+<p><img alt="image-20220517141847967" src="assets/image-20220517141847967.png" /></p>
+<ul>
+<li>在训练过程中，Dropout的实现是让神经元以超参数p的概率停止工作或者激活被置为0,未被置为0的进行缩放，缩放比例为1/(1-p)。训练过程可以认为是对完整的神经网络的一些子集进行训练，每次基于输入数据只更新子网络的参数。</li>
+<li>在测试过程中，随机失活不起作用，最后的输出结果要乘以P。</li>
+</ul>
+<p>我们通过一段代码观察下dropout的效果：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="c1"># 初始化随机失活层</span>
+    <span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+    <span class="c1"># 初始化输入数据:表示某一层的weight信息</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;未失活FC层的输出结果：</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span>  <span class="n">dropout</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;失活后FC层的输出结果：</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+</code></pre></div>
+<p>程序输出结果：</p>
+<div class="highlight"><pre><span></span><code><span class="n">未失活FC层的输出结果</span><span class="err">：</span>
+ <span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.8369</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.5720</span><span class="p">,</span>  <span class="mf">0.2258</span><span class="p">,</span>  <span class="mf">3.4256</span><span class="p">,</span>  <span class="mf">2.1919</span><span class="p">]],</span>
+       <span class="n">grad_fn</span><span class="o">=&lt;</span><span class="n">AddmmBackward0</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="n">失活后FC层的输出结果</span><span class="err">：</span>
+ <span class="n">tensor</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.3949</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.2866</span><span class="p">,</span>  <span class="mf">0.3763</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">3.6531</span><span class="p">]],</span> <span class="n">grad_fn</span><span class="o">=&lt;</span><span class="n">MulBackward0</span><span class="o">&gt;</span><span class="p">)</span>
+</code></pre></div>
+<p>上述代码将 Dropout 层的概率 p 设置为 0.4，此时经过 Dropout 层计算的张量中就出现了很多 0 , 未变为0的按照（1/(1-0.4)）进行处理。</p>
+<h4 id="432-norm">4.3.2 规范化(Norm层)<a class="headerlink" href="#432-norm" title="Permanent link">&para;</a></h4>
+<p>在神经网络的训练过程中，流经网络的数据都是一个 batch，每个batch 之间的数据分布变化非常剧烈，这就使得网络参数频繁的进行大的调整以适应流经网络的不同分布的数据，给模型训练带来非常大的不稳定性，使得模型难以收敛。如果我们对每一个batch 的数据或某一层的数据进行标准化之后，数据分布就变得稳定，参数的梯度变化也变得稳定，有助于加快模型的收敛。</p>
+<p><img alt="image-20220517143935599" src="assets/image-20220517143935599.png" /></p>
+<p>写成公式如下所示：</p>
+<p><img src="assets/48.png" /></p>
+<ol>
+<li>λ 和 β 是可学习的参数，它相当于对标准化后的值做了一个线性变换，λ 为系数，β 为偏置；</li>
+<li>eps 通常指为 1e-5，避免分母为 0；</li>
+<li>E(x) 表示变量的均值；</li>
+<li>Var(x) 表示变量的方差；</li>
+</ol>
+<h2 id="5">5.模型预测<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
+<p>使用训练好的模型对新数据进行预测的过程。核心目标是将训练阶段学到的模式应用于未知数据，实现模型的实用价值。</p>
+<p>预测的主要流程：</p>
+<p><strong>1.数据或文本预处理</strong></p>
+<p>清洗和标准化原始数据</p>
+<p><strong>2.Tokenization与词嵌入</strong>（NLP）</p>
+<p>将文本转换为模型可理解的数值特征</p>
+<p><strong>3.模型推理</strong></p>
+<p>使用训练好的模型进行预测</p>
+<p><strong>4.后处理</strong></p>
+<p>将模型输出转换为可读的最终结果</p>
+<h2 id="6">6.总结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p><strong>一.数据准备</strong></p>
+<p><strong>1. 数据组成</strong>：包括特征（输入）、标签/目标值（输出）和样本（完整记录）。</p>
+<p><strong>2. 数据划分</strong>：</p>
+<ul>
+<li>训练集（60-80%）：用于模型学习。</li>
+<li>验证集（10-20%）：用于调参和模型选择。</li>
+<li>测试集（10-20%）：用于最终性能评估。</li>
+</ul>
+<p><strong>3. 数据表示</strong>：使用PyTorch张量（多维数组）表示数据，支持GPU加速。</p>
+<p><strong>4. 文本预处理</strong>：</p>
+<ul>
+<li>分词：将文本切分为词或子词单元。</li>
+<li>构建词表：建立词语到ID的映射。</li>
+</ul>
+<p><strong>5. 词向量化</strong>：</p>
+<ul>
+<li>One-Hot编码（高维稀疏）。</li>
+<li>词嵌入（如<code>nn.Embedding</code>，低维稠密，可捕捉语义）。</li>
+</ul>
+<p><strong>二、模型选择</strong></p>
+<p><strong>1.什么是神经网络</strong>：</p>
+<ul>
+<li>模仿生物神经元，由输入层、隐藏层和输出层组成。</li>
+</ul>
+<p><strong>2. 激活函数</strong>：</p>
+<ul>
+<li>作用：引入非线性，增强模型拟合能力。</li>
+<li><strong>ReLU</strong>：最常用，缓解梯度消失。</li>
+<li><strong>Sigmoid</strong>：用于二分类输出层。</li>
+<li><strong>Softmax</strong>：用于多分类输出层。</li>
+<li><strong>GELU</strong>：Transformer常用，平滑且梯度非零。</li>
+</ul>
+<p><strong>3. 模型搭建</strong>：</p>
+<ul>
+<li>使用<code>nn.Module</code>定义网络结构，包含<code>__init__</code>（定义层）和<code>forward</code>（定义前向传播）。</li>
+</ul>
+<p><strong>三、模型训练</strong></p>
+<p><strong>1. 损失函数</strong>：</p>
+<ul>
+<li><strong>交叉熵损失</strong>：用于多分类（配合Softmax）。</li>
+<li><strong>二分类交叉熵</strong>：用于二分类（配合Sigmoid）。</li>
+</ul>
+<p><strong>2. 优化器</strong>：</p>
+<ul>
+<li><strong>梯度下降</strong>：通过梯度反向传播更新参数。</li>
+<li><strong>Adam</strong>：结合动量与自适应学习率，常用且高效。</li>
+</ul>
+<p><strong>3. 训练流程</strong>：</p>
+<ul>
+<li>循环多个Epoch，每个Epoch分批（Batch）处理数据。</li>
+<li>步骤： 前向传播 → 计算损失 → 梯度清零 →反向传播 → 更新参数。</li>
+</ul>
+<p><strong>4. 评估指标</strong>：</p>
+<ul>
+<li>准确率、精确率、召回率、F1分数等，用于分类任务性能评估。</li>
+</ul>
+<p><strong>四、拟合状态</strong></p>
+<p><strong>1. 欠拟合</strong>：</p>
+<ul>
+<li>表现：训练集和验证集误差均高。</li>
+<li>解决：增加模型复杂度、延长训练时间。</li>
+</ul>
+<p><strong>2. 过拟合</strong>：</p>
+<ul>
+<li>表现：训练集误差低，验证集误差高。</li>
+<li>解决：</li>
+<li><strong>Dropout</strong>：随机失活部分神经元，增强泛化。</li>
+<li><strong>Normalization</strong>：规范化层输入，稳定训练过程。</li>
+</ul>
+<p><strong>3. 正好拟合</strong>：</p>
+<ul>
+<li>训练集与验证集误差均低且接近，模型泛化能力强。</li>
+</ul>
+<p><strong>五、模型预测</strong></p>
+<p>将训练好的模型应用于新数据，完成相应的任务</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+        <script src="../js/extra.js"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+      
+    
+  </body>
+</html>
